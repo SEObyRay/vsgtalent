@@ -24,6 +24,8 @@ export interface WPPostMeta {
   circuit?: string | null;
   positie?: number | null;
   samenvatting?: string | null;
+  media_gallery?: string[] | null;
+  media_videos?: string[] | null;
   [key: string]: unknown;
 }
 

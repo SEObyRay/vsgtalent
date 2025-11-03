@@ -112,7 +112,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-headline font-semibold">{heading}</h2>
-        {items.length > 1 && <span className="text-sm text-muted-foreground">{items.length} items</span>}
+        {items.length > 0 && <span className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</span>}
       </div>
 
       <Carousel setApi={setApi} opts={{ align: "center", loop: items.length > 1 }} className="w-full">
@@ -153,7 +153,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
       </Carousel>
 
       {/* Thumbnail grid */}
-      {items.length > 1 && (
+      {items.length >= 1 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 mt-4">
           {items.map((item, index) => (
             <button

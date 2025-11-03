@@ -9,6 +9,7 @@ import { useWordPressPostBySlug } from "@/hooks/use-wordpress";
 import type { WPPost } from "@/types/wordpress";
 import PageSeo from "@/components/seo/PageSeo";
 import { buildCanonical, SITE_URL } from "@/lib/seo";
+import { MediaGallery } from "@/components/news/MediaGallery";
 
 const extractFeaturedImage = (post: WPPost | null) => {
   if (!post?._embedded) return null;
@@ -47,7 +48,7 @@ const NieuwsDetail = () => {
   const featuredImage = useMemo(() => extractFeaturedImage(post), [post]);
   const { competition, season } = useMemo(() => extractTerms(post), [post]);
 
-  const circuit = post?.meta?.circuit ? decodeHtml(post.meta.circuit) : "Onbekend circuit";
+  const circuit = post?.meta?.circuit ? decodeHtml(String(post.meta.circuit)) : "Onbekend circuit";
   const position = post?.meta?.positie ? Number(post.meta.positie) : null;
 
   const canonicalPath = year && slug ? `/nieuws/${year}/${slug}` : "/nieuws";
@@ -151,6 +152,12 @@ const NieuwsDetail = () => {
                   <Trophy className="w-5 h-5" /> Positie: {position}
                 </div>
               )}
+
+              <MediaGallery
+                images={post.meta?.media_gallery ?? []}
+                videos={post.meta?.media_videos ?? []}
+                title="Race media"
+              />
 
               <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content.rendered }} />
             </article>

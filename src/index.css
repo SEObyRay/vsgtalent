@@ -71,8 +71,20 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-body antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold;
+  h1, h2, h3, h4, h5, .prose h1 {
+    @apply text-4xl leading-tight font-headline font-bold;
+  }
+
+  .prose h2 {
+    @apply text-2xl md:text-[28px] leading-snug font-headline font-semibold mt-10 mb-4;
+  }
+
+  .prose h3 {
+    @apply text-xl md:text-2xl leading-snug font-headline font-semibold mt-8 mb-3;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl tracking-tight;
   }
 
   h1 {
@@ -81,10 +93,6 @@ All colors MUST be HSL.
 
   h2 {
     @apply text-3xl md:text-4xl lg:text-5xl tracking-tight;
-  }
-
-  h3 {
-    @apply text-2xl md:text-3xl tracking-tight;
   }
 }
 

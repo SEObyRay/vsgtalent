@@ -1,6 +1,6 @@
 import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm } from "@/types/wordpress";
 
-type FetchParams = Record<string, string | number | boolean | undefined | string[] | number[]>;
+export type FetchParams = Record<string, string | number | boolean | undefined | string[] | number[]>;
 
 const normalizeBaseUrl = (url?: string) => {
   if (!url) return undefined;

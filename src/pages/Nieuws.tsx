@@ -3,6 +3,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import { useWordPressPosts, useWordPressTaxonomy } from "@/hooks/use-wordpress";
@@ -12,6 +13,12 @@ import PageSeo from "@/components/seo/PageSeo";
 import { buildCanonical } from "@/lib/seo";
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
+
+const extractFeaturedImage = (post: WPPost) => {
+  if (!post._embedded) return null;
+  const media = (post._embedded["wp:featuredmedia"] as any)?.[0];
+  return media?.source_url || null;
+};
 
 const getPositionBadge = (position: number | null | undefined) => {
   if (!position) return null;
@@ -198,16 +205,16 @@ const Nieuws = () => {
                 className="group hover:shadow-orange transition-smooth hover-lift overflow-hidden"
               >
                 <Link to={`/nieuws/${new Date(article.date).getFullYear()}/${article.slug}`}>
-                  <div className="aspect-video bg-muted relative overflow-hidden">
+                  <AspectRatio ratio={16 / 9} className="relative bg-muted overflow-hidden rounded-t-[inherit]">
                     <img
-                      src={article.featured_image_url || "/placeholder.svg"}
-                      alt={article.title.rendered}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+                      src={extractFeaturedImage(article) || "/placeholder.svg"}
+                      alt={decodeHtml(article.title.rendered)}
+                      className="absolute inset-0 h-full w-full object-cover transition-smooth group-hover:scale-105"
                     />
                     <div className="absolute top-4 right-4">
                       {getPositionBadge(article.meta.positie ?? null)}
                     </div>
-                  </div>
+                  </AspectRatio>
                   <CardContent className="p-6 space-y-4">
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
