@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#1a1a1a"/>
+  
+  <!-- VSG Talent Logo simplified for favicon -->
+  <!-- Roof lines (orange/red gradient) -->
+  <path d="M 100 280 L 180 180 L 260 280" stroke="#FF6B35" stroke-width="30" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 140 280 L 200 200 L 260 280" stroke="#E63946" stroke-width="25" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 180 280 L 220 220 L 260 280" stroke="#A0A0A0" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- House base -->
+  <path d="M 120 280 L 300 280 L 300 380 L 120 380 Z" fill="#E63946" opacity="0.9"/>
+  
+  <!-- Window -->
+  <rect x="180" y="310" width="40" height="40" fill="#1a1a1a"/>
+  <line x1="200" y1="310" x2="200" y2="350" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="180" y1="330" x2="220" y2="330" stroke="#1a1a1a" stroke-width="2"/>
+</svg>
