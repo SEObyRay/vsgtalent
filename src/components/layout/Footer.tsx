@@ -12,14 +12,15 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-lg">
-                LO
+                VSG
               </div>
-              <span className="font-headline font-bold text-lg">
-                Levy Opbergen
-              </span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-headline font-bold text-lg">VSG Talent</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">Altijd 100%</span>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Volg mijn race avonturen in verschillende kart competities.
+              VSG Talent ondersteunt veelbelovende sporters in Nederland. Een initiatief van VSG Dakwerken.
             </p>
           </div>
 
@@ -48,7 +49,7 @@ const Footer = () => {
                   to="/over-levy"
                   className="text-sm text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  Over Levy
+                  Levy Opbergen
                 </Link>
               </li>
               <li>
@@ -64,14 +65,14 @@ const Footer = () => {
 
           {/* Sponsors */}
           <div>
-            <h4 className="font-headline font-semibold mb-4">Sponsoren</h4>
+            <h4 className="font-headline font-semibold mb-4">Partnerships</h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/sponsors"
                   className="text-sm text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  Alle Sponsors
+                  Onze Partners
                 </Link>
               </li>
               <li>
@@ -79,7 +80,7 @@ const Footer = () => {
                   to="/club-van-100"
                   className="text-sm text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  Club van 100
+                  Word Partner
                 </Link>
               </li>
               <li>
@@ -95,7 +96,7 @@ const Footer = () => {
 
           {/* Social */}
           <div>
-            <h4 className="font-headline font-semibold mb-4">Volg Mij</h4>
+            <h4 className="font-headline font-semibold mb-4">Contact</h4>
             <div className="flex gap-3">
               <a
                 href="https://instagram.com/levyopbergen"

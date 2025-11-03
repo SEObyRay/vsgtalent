@@ -11,8 +11,8 @@ const Header = () => {
     { path: "/", label: "Home" },
     { path: "/nieuws", label: "Nieuws" },
     { path: "/agenda", label: "Agenda" },
-    { path: "/sponsors", label: "Sponsors" },
-    { path: "/over-levy", label: "Over Levy" },
+    { path: "/sponsors", label: "Partners" },
+    { path: "/over-levy", label: "Levy Opbergen" },
     { path: "/media", label: "Media" },
     { path: "/contact", label: "Contact" },
   ];
@@ -26,11 +26,12 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-12 h-12 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-xl transition-smooth group-hover:shadow-orange">
-              LO
+              VSG
             </div>
-            <span className="hidden sm:block font-headline font-bold text-xl">
-              Levy Opbergen
-            </span>
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="font-headline font-bold text-lg">VSG Talent</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">Altijd 100%</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -53,7 +54,7 @@ const Header = () => {
           {/* CTA Button */}
           <div className="hidden md:block">
             <Button asChild className="gradient-orange shadow-orange hover-lift">
-              <Link to="/club-van-100">Word Sponsor</Link>
+              <Link to="/club-van-100">Word Partner</Link>
             </Button>
           </div>
 
@@ -91,7 +92,7 @@ const Header = () => {
               ))}
               <Button asChild className="gradient-orange shadow-orange mt-2">
                 <Link to="/club-van-100" onClick={() => setIsMenuOpen(false)}>
-                  Word Sponsor
+                  Word Partner
                 </Link>
               </Button>
             </div>

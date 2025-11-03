@@ -11,7 +11,7 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-10" />
         <img
           src={heroImage}
-          alt="Levy Opbergen Racing"
+          alt="VSG Talent Racing"
           className="w-full h-full object-cover"
         />
       </div>
@@ -23,7 +23,7 @@ const HeroSection = () => {
           <div className="inline-block">
             <div className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
               <span className="text-sm font-medium text-primary">
-                🏁 Seizoen 2025 - Actief in Multiple Klassen
+                🏆 VSG Talent - Ondersteuning voor Topsporters
               </span>
             </div>
           </div>
@@ -31,14 +31,14 @@ const HeroSection = () => {
           {/* Heading */}
           <div className="space-y-4">
             <h1 className="text-5xl md:text-7xl font-headline font-bold">
-              Levy Opbergen
+              VSG Talent
             </h1>
             <p className="text-2xl md:text-3xl text-gradient-orange font-headline font-semibold">
-              Kart Racing Talent
+              Altijd 100%, in weer en wind
             </p>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
-              Volg mijn race avonturen door verschillende competities en circuits. 
-              Ik deel hier al mijn wedstrijdverslagen, foto's en video's.
+              VSG Talent ondersteunt veelbelovende sporters in Nederland. 
+              Een initiatief van VSG Dakwerken om jong talent te helpen groeien.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ const HeroSection = () => {
             >
               <Link to="/agenda" className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                Volgende Race
+                Race Agenda
               </Link>
             </Button>
             <Button
@@ -62,13 +62,17 @@ const HeroSection = () => {
             >
               <Link to="/club-van-100" className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Word Sponsor
+                Word Partner
               </Link>
             </Button>
           </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
+              <div className="text-3xl font-bold text-primary">1</div>
+              <div className="text-sm text-muted-foreground">Actieve Talenten</div>
+            </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
               <div className="text-3xl font-bold text-primary">12</div>
               <div className="text-sm text-muted-foreground">Overwinningen</div>
@@ -78,12 +82,8 @@ const HeroSection = () => {
               <div className="text-sm text-muted-foreground">Podiums</div>
             </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-              <div className="text-3xl font-bold text-primary">8</div>
-              <div className="text-sm text-muted-foreground">Pole Positions</div>
-            </div>
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-              <div className="text-3xl font-bold text-primary">15</div>
-              <div className="text-sm text-muted-foreground">Snelste Rondes</div>
+              <div className="text-3xl font-bold text-primary">5+</div>
+              <div className="text-sm text-muted-foreground">Partners</div>
             </div>
           </div>
         </div>
