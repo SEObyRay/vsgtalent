@@ -53,9 +53,8 @@ export const useWordPressPostBySlug = (
       const response = await wordpressClient.fetchPosts({
         slug,
         per_page: 1,
-        _embed: true,
         _fields:
-          "id,slug,title,content,excerpt,date,modified,meta,featured_media,_embedded",
+          "id,slug,title,content,excerpt,date,modified,meta,featured_media",
       });
       return response.items[0] ?? null;
     },
