@@ -55,7 +55,7 @@ export const useWordPressPostBySlug = (
         per_page: 1,
         _embed: true,
         _fields:
-          "id,slug,title,content,excerpt,date,modified,meta,featured_media,featured_image_url,_embedded",
+          "id,slug,title,content,excerpt,date,modified,meta,featured_media,_embedded",
       });
       return response.items[0] ?? null;
     },
