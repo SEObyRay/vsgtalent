@@ -3,7 +3,7 @@
  * Plugin Name: VSGTalent Auto Setup
  * Plugin URI: https://vsgtalent.nl
  * Description: Automatische configuratie voor VSGTalent backend
- * Version: 1.6.1
+ * Version: 1.6.4
  * Author: Ray Gritter
  * Text Domain: vsgtalent-setup
  */
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants
-define('VSGTALENT_VERSION', '1.6.1');
+define('VSGTALENT_VERSION', '1.6.4');
 define('VSGTALENT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('VSGTALENT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -72,25 +72,55 @@ class VSGTalent_Setup {
     
     public function register_meta_fields() {
         $meta_fields = array(
-            'media_gallery' => 'Galerij met afbeelding URLs',
-            'media_videos' => 'Video URLs',
-            'samenvatting' => 'Samenvatting',
-            'circuit' => 'Circuit',
-            'positie' => 'Positie',
-        );
-        
-        foreach ($meta_fields as $field => $description) {
-            $result = register_post_meta('post', $field, array(
-                'type' => 'array',
-                'description' => $description,
-                'single' => true,
-                'show_in_rest' => array(
+            'media_gallery' => array(
+                'type'        => 'array',
+                'description' => 'Galerij met afbeelding URLs',
+                'single'      => true,
+                'show_in_rest'=> array(
                     'schema' => array(
-                        'type' => 'array',
+                        'type'  => 'array',
                         'items' => array('type' => 'string'),
                     ),
                 ),
-            ));
+                'sanitize_callback' => array($this, 'sanitize_media_array'),
+            ),
+            'media_videos' => array(
+                'type'        => 'array',
+                'description' => 'Video URLs',
+                'single'      => true,
+                'show_in_rest'=> array(
+                    'schema' => array(
+                        'type'  => 'array',
+                        'items' => array('type' => 'string'),
+                    ),
+                ),
+                'sanitize_callback' => array($this, 'sanitize_media_array'),
+            ),
+            'samenvatting' => array(
+                'type'              => 'string',
+                'description'       => 'Samenvatting',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'circuit' => array(
+                'type'              => 'string',
+                'description'       => 'Circuit naam',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'positie' => array(
+                'type'              => 'number',
+                'description'       => 'Race positie',
+                'single'            => true,
+                'sanitize_callback' => array($this, 'sanitize_position_meta'),
+                'show_in_rest'      => true,
+            ),
+        );
+
+        foreach ($meta_fields as $field => $args) {
+            $result = register_post_meta('post', $field, $args);
             error_log("VSGTalent: Registered meta field '$field': " . ($result ? 'success' : 'failed'));
         }
     }
@@ -99,7 +129,53 @@ class VSGTalent_Setup {
         // Meta fields are now registered via register_post_meta with show_in_rest
         // No additional REST field registration needed
     }
-    
+
+    /**
+     * Sanitize media array values
+     */
+    public function sanitize_media_array($value) {
+        if (is_string($value)) {
+            $value = array_map('trim', explode(',', $value));
+        }
+
+        if (!is_array($value)) {
+            return array();
+        }
+
+        $sanitized = array();
+
+        foreach ($value as $item) {
+            if (!is_string($item)) {
+                continue;
+            }
+
+            $item = trim($item);
+
+            if ($item === '') {
+                continue;
+            }
+
+            $url = esc_url_raw($item);
+
+            if ($url) {
+                $sanitized[] = $url;
+            }
+        }
+
+        return array_values(array_unique($sanitized));
+    }
+
+    /**
+     * Sanitize numeric race position meta
+     */
+    public function sanitize_position_meta($value) {
+        if (is_numeric($value)) {
+            return absint($value);
+        }
+
+        return null;
+    }
+
     public function add_admin_menu() {
         add_menu_page(
             'VSGTalent Setup',
