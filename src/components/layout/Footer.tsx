@@ -21,16 +21,13 @@ const Footer = () => {
                   src={logoUrl}
                   alt={siteTitle}
                   className="w-12 h-12 object-contain"
+                  style={{ backgroundColor: "transparent" }}
                 />
               ) : (
                 <div className="w-10 h-10 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-lg">
                   VSG
                 </div>
               )}
-              <div className="flex flex-col leading-tight">
-                <span className="font-headline font-bold text-lg">{siteTitle}</span>
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">{siteDescription}</span>
-              </div>
             </div>
             <p className="text-sm text-muted-foreground">
               {siteDescription ||

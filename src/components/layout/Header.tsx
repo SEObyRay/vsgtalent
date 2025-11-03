@@ -36,16 +36,13 @@ const Header = () => {
                 src={logoUrl}
                 alt={siteTitle}
                 className="h-16 w-auto object-contain transition-smooth group-hover:shadow-orange"
+                style={{ backgroundColor: "transparent" }}
               />
             ) : (
               <div className="w-12 h-12 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-xl transition-smooth group-hover:shadow-orange">
                 VSG
               </div>
             )}
-            <div className="hidden sm:flex flex-col leading-tight">
-              <span className="font-headline font-bold text-lg">{siteTitle}</span>
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">{siteTagline}</span>
-            </div>
           </Link>
 
           {/* Desktop Navigation */}
