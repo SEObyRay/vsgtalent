@@ -75,6 +75,19 @@ export interface WPRestCollectionResponse<T> {
   totalPages: number;
 }
 
+export interface WPSettingsImage {
+  url: string;
+  width: number | null;
+  height: number | null;
+}
+
+export interface WPSettings {
+  title: string;
+  description: string;
+  icon: WPSettingsImage | null;
+  logo: WPSettingsImage | null;
+}
+
 export interface WPRestFetchOptions {
   page?: number;
   perPage?: number;

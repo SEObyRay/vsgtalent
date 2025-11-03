@@ -1,6 +1,6 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { wordpressClient, type FetchParams } from "@/lib/wordpress-client";
-import { WPEvent, WPPost, WPTaxonomyTerm, WPRestCollectionResponse } from "@/types/wordpress";
+import { WPEvent, WPPost, WPTaxonomyTerm, WPRestCollectionResponse, WPSettings } from "@/types/wordpress";
 
 const defaultQueryOptions = {
   staleTime: 0,
@@ -15,6 +15,14 @@ export const useWordPressPosts = (
   useQuery<WPRestCollectionResponse<WPPost>>({
     queryKey: ["wp-posts", params],
     queryFn: () => wordpressClient.fetchPosts(params),
+    ...defaultQueryOptions,
+    ...options,
+  });
+
+export const useWordPressSettings = (options?: UseQueryOptions<WPSettings>) =>
+  useQuery<WPSettings>({
+    queryKey: ["wp-settings"],
+    queryFn: () => wordpressClient.fetchSettings(),
     ...defaultQueryOptions,
     ...options,
   });

@@ -3,7 +3,7 @@
  * Plugin Name: VSGTalent Auto Setup
  * Plugin URI: https://vsgtalent.nl
  * Description: Automatische configuratie voor VSGTalent backend
- * Version: 1.6.4
+ * Version: 1.6.8
  * Author: Ray Gritter
  * Text Domain: vsgtalent-setup
  */
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants
-define('VSGTALENT_VERSION', '1.6.4');
+define('VSGTALENT_VERSION', '1.6.8');
 define('VSGTALENT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('VSGTALENT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -27,6 +27,7 @@ class VSGTalent_Setup {
         add_action('init', array($this, 'register_taxonomies'));
         add_action('init', array($this, 'register_meta_fields'));
         add_action('rest_api_init', array($this, 'register_rest_fields'));
+        add_action('rest_api_init', array($this, 'register_rest_routes'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('enqueue_block_editor_assets', array($this, 'enqueue_gutenberg_assets'));
         add_action('send_headers', array($this, 'add_cors_headers'));
@@ -128,6 +129,39 @@ class VSGTalent_Setup {
     public function register_rest_fields() {
         // Meta fields are now registered via register_post_meta with show_in_rest
         // No additional REST field registration needed
+    }
+
+    public function register_rest_routes() {
+        register_rest_route('vsgtalent/v1', '/settings', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_site_settings'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    public function get_site_settings() {
+        $icon_url = get_site_icon_url(512);
+        $logo_id = (int) get_theme_mod('custom_logo');
+        $logo_url = $logo_id ? wp_get_attachment_image_url($logo_id, 'full') : '';
+
+        $icon_data = $icon_url ? array(
+            'url'    => esc_url_raw($icon_url),
+            'width'  => 512,
+            'height' => 512,
+        ) : null;
+
+        $logo_data = $logo_url ? array(
+            'url'    => esc_url_raw($logo_url),
+            'width'  => null,
+            'height' => null,
+        ) : null;
+
+        return array(
+            'title'       => get_bloginfo('name'),
+            'description' => get_bloginfo('description'),
+            'icon'        => $icon_data,
+            'logo'        => $logo_data,
+        );
     }
 
     /**

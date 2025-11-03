@@ -1,4 +1,4 @@
-import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm } from "@/types/wordpress";
+import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm, WPSettings } from "@/types/wordpress";
 
 export type FetchParams = Record<string, string | number | boolean | undefined | string[] | number[]>;
 
@@ -104,6 +104,7 @@ export const wordpressClient = {
   fetchEvent: (id: number) => fetchJson<WPEvent>(`/wp/v2/evenementen/${id}`),
   fetchTaxonomy: (taxonomy: string, params?: FetchParams) =>
     fetchCollection<WPTaxonomyTerm>(`/wp/v2/${taxonomy}`, params),
+  fetchSettings: () => fetchJson<WPSettings>("/vsgtalent/v1/settings"),
 };
 
 export type WordPressClient = typeof wordpressClient;

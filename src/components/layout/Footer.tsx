@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom";
 import { Instagram, Youtube, Facebook } from "lucide-react";
+import { useWordPressSettings } from "@/hooks/use-wordpress";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useWordPressSettings();
+  const siteTitle = settings?.title || "VSG Talent";
+  const siteDescription = settings?.description || "Altijd 100%";
+  const logoUrl = settings?.logo?.url || settings?.icon?.url || "";
 
   return (
     <footer className="bg-card border-t border-border mt-20">
@@ -11,16 +16,25 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-lg">
-                VSG
-              </div>
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={siteTitle}
+                  className="w-10 h-10 rounded-md object-contain"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-lg">
+                  VSG
+                </div>
+              )}
               <div className="flex flex-col leading-tight">
-                <span className="font-headline font-bold text-lg">VSG Talent</span>
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">Altijd 100%</span>
+                <span className="font-headline font-bold text-lg">{siteTitle}</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">{siteDescription}</span>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              VSG Talent ondersteunt veelbelovende sporters in Nederland. Een initiatief van VSG Dakwerken.
+              {siteDescription ||
+                "VSG Talent ondersteunt veelbelovende sporters in Nederland. Een initiatief van VSG Dakwerken."}
             </p>
           </div>
 
@@ -131,9 +145,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} Levy Opbergen. Alle rechten voorbehouden.
-          </p>
+          <p className="text-sm text-muted-foreground">© {currentYear} {siteTitle}. Alle rechten voorbehouden.</p>
           <div className="flex gap-6">
             <Link
               to="/privacy"

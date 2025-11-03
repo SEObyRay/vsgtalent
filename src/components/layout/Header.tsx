@@ -1,11 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useWordPressSettings } from "@/hooks/use-wordpress";
 import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  const { data: settings } = useWordPressSettings();
+  const logoUrl = settings?.logo?.url || settings?.icon?.url || "";
+  const siteTitle = settings?.title || "VSG Talent";
+  const siteTagline = settings?.description || "Altijd 100%, in weer en wind";
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -25,12 +31,20 @@ const Header = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-12 h-12 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-xl transition-smooth group-hover:shadow-orange">
-              VSG
-            </div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={siteTitle}
+                className="h-12 w-auto rounded-md object-contain transition-smooth group-hover:shadow-orange"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-xl transition-smooth group-hover:shadow-orange">
+                VSG
+              </div>
+            )}
             <div className="hidden sm:flex flex-col leading-tight">
-              <span className="font-headline font-bold text-lg">VSG Talent</span>
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">Altijd 100%</span>
+              <span className="font-headline font-bold text-lg">{siteTitle}</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{siteTagline}</span>
             </div>
           </Link>
 
