@@ -35,7 +35,7 @@ const Header = () => {
               <img
                 src={logoUrl}
                 alt={siteTitle}
-                className="h-12 w-auto rounded-md object-contain transition-smooth group-hover:shadow-orange"
+                className="h-16 w-auto object-contain transition-smooth group-hover:shadow-orange"
               />
             ) : (
               <div className="w-12 h-12 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-xl transition-smooth group-hover:shadow-orange">

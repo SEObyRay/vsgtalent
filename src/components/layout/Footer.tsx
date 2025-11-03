@@ -20,7 +20,7 @@ const Footer = () => {
                 <img
                   src={logoUrl}
                   alt={siteTitle}
-                  className="w-10 h-10 rounded-md object-contain"
+                  className="w-12 h-12 object-contain"
                 />
               ) : (
                 <div className="w-10 h-10 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-lg">
