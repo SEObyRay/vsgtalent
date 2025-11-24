@@ -3,6 +3,11 @@ import { Instagram, Linkedin, MapPin, Phone, Mail } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const buildTimestamp = new Date().toLocaleString("nl-NL", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Europe/Amsterdam",
+  });
 
   return (
     <footer className="bg-card border-t border-border mt-20">
@@ -130,6 +135,7 @@ const Footer = () => {
             <div className="flex flex-col items-center md:items-start gap-1">
               <p className="text-sm text-muted-foreground">© {currentYear} VSG Dakwerken B.V. Alle rechten voorbehouden.</p>
               <p className="text-xs text-muted-foreground/70 italic">Altijd 100%, in weer en wind</p>
+              <p className="text-[10px] text-muted-foreground/60">Build: {buildTimestamp}</p>
             </div>
             <div className="flex gap-6">
               <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors duration-300">

@@ -4,6 +4,11 @@ import { useWordPressSettings } from "@/hooks/use-wordpress";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const buildTimestamp = new Date().toLocaleString("nl-NL", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Europe/Amsterdam",
+  });
   const { data: settings } = useWordPressSettings();
   const siteTitle = settings?.title || "VSG Talent";
   const siteDescription = settings?.description || "Altijd 100%";
@@ -143,6 +148,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">© {currentYear} {siteTitle}. Alle rechten voorbehouden.</p>
+          <p className="text-xs text-muted-foreground/70">Laatste update: {buildTimestamp}</p>
           <div className="flex gap-6">
             <Link
               to="/privacy"
