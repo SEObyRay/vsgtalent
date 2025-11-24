@@ -18,9 +18,13 @@ interface AgendaDetailParams {
   };
 }
 
+type AgendaEmbeddedMedia = {
+  "wp:featuredmedia"?: Array<{ source_url?: string | null }>;
+};
+
 const extractFeaturedImage = (event: WPEvent | null) => {
-  if (!event?._embedded) return null;
-  const media = (event._embedded["wp:featuredmedia"] as any)?.[0];
+  const embedded = event?._embedded as AgendaEmbeddedMedia | undefined;
+  const media = embedded?.["wp:featuredmedia"]?.[0];
   return media?.source_url || null;
 };
 

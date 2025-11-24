@@ -1,3 +1,4 @@
+import type { ElementType } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getWordPressSponsors } from "@/lib/wordpress-data";
@@ -16,8 +17,8 @@ export default async function SponsorsPage() {
   try {
     const res = await getWordPressSponsors({ per_page: 100, _embed: true, order: "asc" }, 30);
     sponsors = res.items
-      .filter((s) => (s.meta as any)?.active !== false)
-      .sort((a, b) => ((a.meta as any)?.priority ?? 999) - ((b.meta as any)?.priority ?? 999));
+      .filter((s) => s.meta?.active !== false)
+      .sort((a, b) => (a.meta?.priority ?? 999) - (b.meta?.priority ?? 999));
   } catch {
     sponsors = [];
   }
@@ -34,8 +35,8 @@ export default async function SponsorsPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {sponsors.map((s) => {
               const logo = pickLogo(s);
-              const website = (s.meta as any)?.website as string | undefined;
-              const Wrapper: any = website ? Link : "div";
+              const website = s.meta?.website ?? undefined;
+              const Wrapper: ElementType = website ? Link : "div";
               const wrapperProps = website ? { href: website, target: "_blank", rel: "noopener noreferrer" } : {};
 
               return (

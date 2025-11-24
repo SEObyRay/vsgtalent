@@ -1,5 +1,5 @@
 import { FetchParams, wordpressClient } from "@/lib/wordpress-client";
-import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm, WPSponsor } from "@/types/wordpress";
+import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm } from "@/types/wordpress";
 
 const DEFAULT_COLLECTION_REVALIDATE = 120; // seconds
 const DEFAULT_SINGLE_REVALIDATE = 60; // seconds

@@ -101,9 +101,9 @@ export const wordpressClient = {
   fetchSponsors: async (params?: FetchParams, init?: FetchInit) => {
     try {
       return await fetchCollection<WPSponsor>("/wp/v2/sponsors", params, init);
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Fallback if rest_base differs (e.g., 'sponsor')
-      if (typeof e?.message === "string" && e.message.includes("status 404")) {
+      if (e instanceof Error && e.message.includes("status 404")) {
         return await fetchCollection<WPSponsor>("/wp/v2/sponsor", params, init);
       }
       throw e;

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Handshake, Users, Gift, Trophy } from "lucide-react";
+import { Sparkles, Handshake, Gift, Trophy } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Club van 100",

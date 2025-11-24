@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -125,7 +126,7 @@ export default function ContactPage() {
                 Bekijk waar Levy binnenkort in actie komt en plan een bezoek of hospitality-pakket.
               </p>
               <Button variant="outline" asChild size="sm">
-                <a href="/agenda">Agenda bekijken</a>
+                <Link href="/agenda">Agenda bekijken</Link>
               </Button>
             </CardContent>
           </Card>

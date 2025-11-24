@@ -1,7 +1,7 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
@@ -12,10 +12,8 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import cloudwaysImageLoader from "./imageLoader";
 
 const VIDEO_FILE_EXTENSIONS = ["mp4", "webm", "ogg", "ogv", "mov", "m4v"] as const;
-const WP_UPLOAD_PATH = "/wp-content/uploads/";
 const WP_SIZE_PATTERN = /-\d+x\d+\./;
 
 /**

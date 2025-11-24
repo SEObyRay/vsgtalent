@@ -14,10 +14,16 @@ import type { WPPost } from "@/types/wordpress";
 
 type NieuwsRouteParams = Promise<{ slug: string; year: string }>;
 
+type FeaturedMedia = { source_url?: string | null };
+type PostEmbeddedMedia = {
+  "wp:featuredmedia"?: FeaturedMedia[];
+};
+type EmbeddedTerm = { taxonomy?: string; name?: string };
+
 const extractFeaturedImage = (post: WPPost | null) => {
-  if (!post?._embedded) return null;
-  const media = (post._embedded["wp:featuredmedia"] as any)?.[0];
-  return media?.source_url ?? post.featured_image_url ?? null;
+  const embedded = post?._embedded as PostEmbeddedMedia | undefined;
+  const media = embedded?.["wp:featuredmedia"]?.[0];
+  return media?.source_url ?? post?.featured_image_url ?? null;
 };
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
@@ -32,7 +38,8 @@ const formatDate = (value?: string | null) => {
 };
 
 const extractTerms = (post: WPPost | null) => {
-  const embeddedTerms = (post?._embedded?.["wp:term"] as any[][]) ?? [];
+  const embedded = post?._embedded as { "wp:term"?: EmbeddedTerm[][] } | undefined;
+  const embeddedTerms = embedded?.["wp:term"] ?? [];
   const terms = embeddedTerms.flat();
   const findByTaxonomy = (taxonomy: string) => terms.find((term) => term.taxonomy === taxonomy);
 
@@ -127,8 +134,8 @@ export default async function NieuwsDetailPage({ params }: { params: NieuwsRoute
   const featuredImage = extractFeaturedImage(post);
   const { competition, season } = extractTerms(post);
   const circuit = post?.meta?.circuit ? decodeHtml(post.meta.circuit) : "Onbekend circuit";
-  const position = post?.meta?.positie ? Number(post.meta.positie) : null;
-  const time = (post.meta as any)?.tijd ? decodeHtml(String((post.meta as any)?.tijd)) : null;
+  const position = typeof post?.meta?.positie === "number" ? post.meta.positie : null;
+  const time = post.meta?.tijd ? decodeHtml(String(post.meta.tijd)) : null;
   const canonicalPath = `/nieuws/${year}/${slug}`;
   const rawSummary = post?.meta?.samenvatting ?? post?.excerpt?.rendered ?? "";
   const description =

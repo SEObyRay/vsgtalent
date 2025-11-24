@@ -39,9 +39,13 @@ const buildFilterHref = (year: number | null, competition: number | null) => {
   return query ? `/nieuws?${query}` : "/nieuws";
 };
 
+type NieuwsEmbeddedMedia = {
+  "wp:featuredmedia"?: Array<{ source_url?: string | null }>;
+};
+
 const getFeaturedImage = (post: WPPost) => {
   if (post.featured_image_url) return post.featured_image_url;
-  const embedded = post._embedded as any;
+  const embedded = post._embedded as NieuwsEmbeddedMedia | undefined;
   const media = embedded?.["wp:featuredmedia"]?.[0];
   return media?.source_url ?? "/placeholder.svg";
 };
@@ -186,18 +190,8 @@ export default async function NieuwsPage({ searchParams }: NieuwsPageProps) {
             const image = getFeaturedImage(post);
             const year = new Date(post.date).getFullYear();
             const href = `/nieuws/${year}/${post.slug}`;
-            const position = (post.meta as any)?.positie ?? null;
+            const position = typeof post.meta?.positie === "number" ? post.meta.positie : null;
             const competitionLabel = getCompetitionLabel(post, competitionMap);
-
-            const badgeClass = position
-              ? position === 1
-                ? "bg-yellow-500 text-black"
-                : position === 2
-                ? "bg-gray-300 text-black"
-                : position === 3
-                ? "bg-orange-600 text-white"
-                : "bg-muted text-foreground"
-              : "";
 
             return (
               <Card key={post.id} className="group hover:shadow-orange transition-all duration-300 hover-lift overflow-hidden">
@@ -233,7 +227,7 @@ export default async function NieuwsPage({ searchParams }: NieuwsPageProps) {
                     </div>
                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>{(post.meta as any)?.circuit || "Onbekend Circuit"}</span>
+                      <span>{post.meta?.circuit || "Onbekend Circuit"}</span>
                     </div>
                     {competitionLabel && <div className="text-xs font-medium text-primary">{competitionLabel}</div>}
                     <h3 className="font-headline font-semibold text-xl group-hover:text-primary transition-colors">

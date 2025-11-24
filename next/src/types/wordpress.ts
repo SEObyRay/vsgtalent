@@ -24,6 +24,7 @@ export interface WPPostMeta {
   circuit?: string | null;
   positie?: number | null;
   samenvatting?: string | null;
+  tijd?: string | null;
   media_gallery?: string[] | string | null;
   media_videos?: string[] | string | null;
   [key: string]: unknown;
@@ -67,6 +68,7 @@ export interface WPSponsorMeta {
 
 export interface WPSponsor extends WPBaseEntity {
   meta: WPSponsorMeta;
+  _embedded?: Record<string, unknown>;
 }
 
 export interface WPTaxonomyTerm {

@@ -5,26 +5,19 @@
  * direct van de Cloudways server te laden.
  */
 
-import { ImageLoaderProps } from 'next/image';
+import { ImageLoaderProps } from "next/image";
 
 /**
  * Detecteert of een URL relatief of absoluut is
  */
 const isAbsoluteUrl = (url: string): boolean => {
   return /^(?:[a-z+]+:)?\/\//i.test(url);
-}
-
-/**
- * Zorgt ervoor dat een pad begint met /
- */
-const ensureLeadingSlash = (path: string): string => {
-  return path.startsWith('/') ? path : `/${path}`;
-}
+};
 
 /**
  * Converteert elke afbeeldings-URL naar de directe Cloudways URL
  */
-const cloudwaysImageLoader = ({ src, width, quality }: ImageLoaderProps): string => {
+const cloudwaysImageLoader = ({ src }: ImageLoaderProps): string => {
   // Als het al een absolute URL is, pas dan alleen width/quality toe indien nodig
   if (isAbsoluteUrl(src)) {
     // Als het al een Cloudways URL is, return ongewijzigd

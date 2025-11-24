@@ -4,11 +4,12 @@ const normalizeBaseUrl = (url?: string | null) => {
 };
 
 const baseUrl = normalizeBaseUrl(
-  process.env.WP_BASE_URL ?? process.env.NEXT_PUBLIC_WP_BASE_URL ?? (process.env as any).VITE_WP_BASE_URL,
+  process.env.WP_BASE_URL ?? process.env.NEXT_PUBLIC_WP_BASE_URL ?? process.env["VITE_WP_BASE_URL"],
 );
-const username = process.env.WP_USERNAME ?? process.env.NEXT_PUBLIC_WP_USERNAME ?? (process.env as any).VITE_WP_USERNAME;
+const username =
+  process.env.WP_USERNAME ?? process.env.NEXT_PUBLIC_WP_USERNAME ?? process.env["VITE_WP_USERNAME"];
 const appPassword =
-  process.env.WP_APP_PASSWORD ?? process.env.NEXT_PUBLIC_WP_APP_PASSWORD ?? (process.env as any).VITE_WP_APP_PASSWORD;
+  process.env.WP_APP_PASSWORD ?? process.env.NEXT_PUBLIC_WP_APP_PASSWORD ?? process.env["VITE_WP_APP_PASSWORD"];
 
 // Allow builds without WordPress configured (will use fallback data)
 // Only warn in development mode

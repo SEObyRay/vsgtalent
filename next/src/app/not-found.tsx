@@ -54,7 +54,7 @@ export default function NotFound() {
             <h2 className="text-3xl md:text-4xl font-headline font-bold">Pagina niet gevonden</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               De pagina die je zoekt bestaat niet, is verplaatst of tijdelijk niet beschikbaar.
-              Bekijk hieronder de belangrijkste pagina's of ga terug.
+              Bekijk hieronder de belangrijkste pagina&apos;s of ga terug.
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-2xl font-headline font-semibold text-center">Populaire pagina's</h3>
+          <h3 className="text-2xl font-headline font-semibold text-center">Populaire pagina&#39;s</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {quickLinks.map((link) => {

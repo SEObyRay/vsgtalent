@@ -5,8 +5,12 @@ import { ArrowRight } from "lucide-react";
 import { getWordPressSponsors } from "@/lib/wordpress-data";
 import { WPSponsor } from "@/types/wordpress";
 
+type SponsorEmbeddedMedia = {
+  "wp:featuredmedia"?: Array<{ source_url?: string | null }>;
+};
+
 const pickLogo = (s: WPSponsor) => {
-  const embedded: any = (s as any)._embedded;
+  const embedded = s._embedded as SponsorEmbeddedMedia | undefined;
   const media = embedded?.["wp:featuredmedia"]?.[0]?.source_url;
   return s.featured_image_url ?? media ?? "/placeholder.svg";
 };
@@ -16,8 +20,8 @@ export default async function SponsorShowcase() {
   try {
     const res = await getWordPressSponsors({ per_page: 12, _embed: true, order: "asc" }, 0);
     sponsors = res.items
-      .filter((s) => (s.meta as any)?.active !== false) // show all unless explicitly inactive
-      .sort((a, b) => ((a.meta as any)?.priority ?? 999) - ((b.meta as any)?.priority ?? 999));
+      .filter((s) => s.meta?.active !== false) // show all unless explicitly inactive
+      .sort((a, b) => (a.meta?.priority ?? 999) - (b.meta?.priority ?? 999));
   } catch {
     sponsors = [];
   }

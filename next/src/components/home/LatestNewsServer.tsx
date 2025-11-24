@@ -6,9 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getWordPressPosts } from "@/lib/wordpress-data";
 import { WPPost } from "@/types/wordpress";
 
+type LatestNewsEmbeddedMedia = {
+  "wp:featuredmedia"?: Array<{ source_url?: string | null }>;
+};
+
 const getFeaturedImage = (post: WPPost): string | null => {
   if (post.featured_image_url) return post.featured_image_url;
-  const embedded = post._embedded as any;
+  const embedded = post._embedded as LatestNewsEmbeddedMedia | undefined;
   const media = embedded?.["wp:featuredmedia"]?.[0];
   return media?.source_url ?? null;
 };
@@ -58,7 +62,7 @@ export default async function LatestNews() {
                     </div>
                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>{(post.meta as any)?.circuit ?? ""}</span>
+                      <span>{post.meta?.circuit ?? ""}</span>
                     </div>
                     <h3 className="font-headline font-semibold text-xl group-hover:text-primary transition-colors duration-300">
                       {post.title?.rendered}
