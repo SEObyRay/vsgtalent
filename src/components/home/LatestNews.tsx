@@ -2,6 +2,17 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useWordPressPosts } from "@/hooks/use-wordpress";
+import { decodeHtml } from "@/lib/utils";
+import type { WPPost } from "@/types/wordpress";
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
+
+const extractFeaturedImage = (post: WPPost) => {
+  if (!post._embedded) return null;
+  const media = (post._embedded["wp:featuredmedia"] as any)?.[0];
+  return media?.source_url || null;
+};
 
 // Mock data - replace with WordPress GraphQL data later
 const mockNews = [
@@ -38,13 +49,36 @@ const mockNews = [
 ];
 
 const LatestNews = () => {
+  const { data: postsData } = useWordPressPosts({
+    per_page: 3,
+    order: "desc",
+    orderby: "date",
+    _embed: true,
+  });
+
+  const wpPosts = postsData?.items ?? [];
+
+  const wpArticles =
+    wpPosts.map((post) => ({
+      id: post.id,
+      title: decodeHtml(post.title.rendered),
+      slug: post.slug,
+      excerpt: decodeHtml(stripHtml(post.excerpt?.rendered ?? "")),
+      date: post.date,
+      circuit: (post.meta as any)?.circuit ?? "Onbekend Circuit",
+      position: (post.meta as any)?.positie ?? null,
+      image: extractFeaturedImage(post) || "/placeholder.svg",
+    })) ?? [];
+
+  const articles = wpArticles.length > 0 ? wpArticles : mockNews;
+
   const getPositionBadge = (position: number) => {
     const colors = {
       1: "bg-yellow-500 text-black",
       2: "bg-gray-300 text-black",
       3: "bg-orange-600 text-white",
     };
-    
+
     return (
       <div
         className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-bold ${
@@ -77,12 +111,12 @@ const LatestNews = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {mockNews.map((article) => (
+          {articles.map((article) => (
             <Card
               key={article.id}
               className="group hover:shadow-orange transition-smooth hover-lift overflow-hidden bg-card"
             >
-              <Link to={`/nieuws/${article.slug}`}>
+              <Link to={`/nieuws/${new Date(article.date).getFullYear()}/${article.slug}`}>
                 <div className="aspect-video bg-muted relative overflow-hidden">
                   <img
                     src={article.image}

@@ -15,7 +15,9 @@
         var postId = useSelect(function(select) {
             return select('core/editor').getCurrentPostId();
         }, []);
+        
         var editPost = useDispatch('core/editor').editPost;
+        
         var meta = useSelect(function(select) {
             return select('core/editor').getEditedPostAttribute('meta') || {};
         }, []);
@@ -61,7 +63,6 @@
                     style: { 
                         marginBottom: '8px', 
                         display: 'flex', 
-                        gap: '8px', 
                         alignItems: 'center'
                     } 
                 }, [
@@ -70,7 +71,8 @@
                         style: { 
                             width: '40px', 
                             height: '40px', 
-                            objectFit: 'cover'
+                            objectFit: 'cover',
+                            marginRight: '8px'
                         } 
                     }),
                     el('span', { 
@@ -98,15 +100,15 @@
                     style: { 
                         marginBottom: '8px', 
                         display: 'flex', 
-                        gap: '8px', 
-                        alignItems: 'center'
+                        alignItems: 'center' 
                     } 
                 }, [
                     el('span', { 
                         style: { 
                             flex: 1, 
                             fontSize: '12px', 
-                            wordBreak: 'break-all'
+                            wordBreak: 'break-all',
+                            marginRight: '8px'
                         } 
                     }, videoUrl),
                     el(Button, { 

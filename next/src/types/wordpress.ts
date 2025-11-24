@@ -23,6 +23,9 @@ export interface WPBaseEntity {
 export interface WPPostMeta {
   circuit?: string | null;
   positie?: number | null;
+  samenvatting?: string | null;
+  media_gallery?: string[] | string | null;
+  media_videos?: string[] | string | null;
   [key: string]: unknown;
 }
 

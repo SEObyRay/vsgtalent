@@ -41,9 +41,11 @@ export default async function LatestNews() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {items.map((post) => {
             const img = getFeaturedImage(post) ?? "/placeholder.svg";
+            const year = new Date(post.date).getFullYear();
+            const href = `/nieuws/${year}/${post.slug}`;
             return (
               <Card key={post.id} className="group hover:shadow-orange hover-lift overflow-hidden bg-card">
-                <Link href={`/nieuws/${post.slug}`}>
+                <Link href={href}>
                   <div className="aspect-video bg-muted relative overflow-hidden">
                     <Image src={img} alt={post.title?.rendered || ""} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>

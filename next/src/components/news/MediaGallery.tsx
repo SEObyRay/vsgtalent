@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
@@ -8,58 +12,117 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import cloudwaysImageLoader from "./imageLoader";
 
 const VIDEO_FILE_EXTENSIONS = ["mp4", "webm", "ogg", "ogv", "mov", "m4v"] as const;
 const WP_UPLOAD_PATH = "/wp-content/uploads/";
+const WP_SIZE_PATTERN = /-\d+x\d+\./;
 
-const CLOUDWAYS_BASE = "https://wordpress-474222-5959679.cloudwaysapps.com";
+/**
+ * NOODOPLOSSING: Directe Cloudways URLs gebruiken voor alle omgevingen
+ * 
+ * Deze functie forceert alle afbeelding URLs naar de directe Cloudways server,
+ * wat CORS-problemen omzeilt maar de Next.js rewrites negeert.
+ */
+/**
+ * Voegt een WordPress image size toe aan een afbeelding URL
+ * Bijvoorbeeld: mijnfoto.jpg -> mijnfoto-800x450.jpg voor de racing-gallery size
+ */
+const addSizeToImageUrl = (url: string, size: 'racing-gallery' | 'thumbnail' | 'medium' | 'large' | string): string => {
+  if (!url) return '';
+  
+  try {
+    // Parse de URL
+    const parsedUrl = new URL(url);
+    const pathParts = parsedUrl.pathname.split('/');
+    const filename = pathParts[pathParts.length - 1];
+    
+    // Check of deze URL al een size bevat
+    if (WP_SIZE_PATTERN.test(filename)) {
+      // Vervang bestaande size met nieuwe size
+      const newFilename = filename.replace(WP_SIZE_PATTERN, size === 'racing-gallery' ? '-800x450.' : '-150x150.');
+      pathParts[pathParts.length - 1] = newFilename;
+      parsedUrl.pathname = pathParts.join('/');
+      return parsedUrl.toString();
+    } else {
+      // Voeg size toe aan de bestandsnaam
+      const lastDot = filename.lastIndexOf('.');
+      if (lastDot !== -1) {
+        const name = filename.substring(0, lastDot);
+        const extension = filename.substring(lastDot);
+        const sizePostfix = size === 'racing-gallery' ? '-800x450' : '-150x150';
+        const newFilename = `${name}${sizePostfix}${extension}`;
+        pathParts[pathParts.length - 1] = newFilename;
+        parsedUrl.pathname = pathParts.join('/');
+        return parsedUrl.toString();
+      }
+    }
+  } catch (error) {
+    console.error('Error adding size to image URL:', error);
+  }
+  
+  // Fallback bij fouten: originele URL terugsturen
+  return url;
+};
 
 const normalizeMediaSource = (source: string): string => {
-  if (!source) return source;
+  // Altijd debug output tonen voor troubleshooting
+  console.log("Media Gallery received URL:", source);
 
-  // 1) Absolute URLs
+  // 1. Negeer lege URLs of numerieke IDs
+  if (!source) return source;
+  if (/^\d+$/.test(source)) {
+    console.warn("Media Gallery: Ignoring numeric ID:", source);
+    return "";
+  }
+
+  // 2. vsgtalent.nl URLs ALTIJD direct omzetten naar Cloudways URLs
+  if (source.includes("vsgtalent.nl/wp-content/uploads")) {
+    const cloudwaysUrl = source.replace(
+      "vsgtalent.nl/wp-content/uploads", 
+      "wordpress-474222-5959679.cloudwaysapps.com/wp-content/uploads"
+    );
+    console.log("Media Gallery: Converted vsgtalent.nl URL to Cloudways:", cloudwaysUrl);
+    return cloudwaysUrl;
+  }
+
+  // 3. Lokale URLs of relatieve paden ALTIJD omzetten naar volledige Cloudways URLs
+  if (source.startsWith("/wp-content/uploads/") || 
+      source.startsWith("wp-content/uploads/") ||
+      source.startsWith("./wp-content/uploads/")) {
+    // Strip any leading slashes or ./ for consistency
+    const cleanPath = source.replace(/^(\/|\.\/)*/, "");
+    const cloudwaysUrl = `https://wordpress-474222-5959679.cloudwaysapps.com/${cleanPath}`;
+    console.log("Media Gallery: Converted relative path to direct Cloudways URL:", cloudwaysUrl);
+    return cloudwaysUrl;
+  }
+
+  // 4. Andere absolute URLs (inclusief Cloudways URLs) ongewijzigd laten
   if (source.startsWith("http://") || source.startsWith("https://")) {
-    // Convert vsgtalent.nl to Cloudways
-    if (source.includes("vsgtalent.nl")) {
-      return source
-        .replace("https://vsgtalent.nl", CLOUDWAYS_BASE)
-        .replace("http://vsgtalent.nl", CLOUDWAYS_BASE);
-    }
-    // Keep Cloudways as-is
-    if (source.includes("wordpress-474222-5959679.cloudwaysapps.com")) {
-      return source;
-    }
-    // If absolute but contains /wp-content/uploads, force Cloudways base
-    if (source.includes("/wp-content/uploads/")) {
-      try {
-        const u = new URL(source);
-        const idx = u.pathname.indexOf(WP_UPLOAD_PATH);
-        if (idx !== -1) {
-          const rel = u.pathname.slice(idx);
-          return `${CLOUDWAYS_BASE}${rel}`;
-        }
-      } catch {}
-    }
-    // Otherwise leave as-is
+    console.log("Media Gallery: Keeping absolute URL as-is:", source);
     return source;
   }
 
-  // 2) Relative paths: always serve from Cloudways
-  if (source.startsWith(WP_UPLOAD_PATH)) {
-    return `${CLOUDWAYS_BASE}${source}`;
-  }
-  if (source.includes("/wp-content/uploads/")) {
-    const rel = source.substring(source.indexOf("/wp-content/uploads/"));
-    return `${CLOUDWAYS_BASE}${rel}`;
+  // 5. Fallback: probeer altijd een pad aan te vullen met de Cloudways basis URL
+  console.log("Media Gallery: Unknown URL format, trying Cloudways base URL:", source);
+  return `https://wordpress-474222-5959679.cloudwaysapps.com/wp-content/uploads/${source.replace(/^(\/|\.\/)*/, "")}`;
+};
+
+const ensureArray = (value?: string[] | string | null): (string | null | undefined)[] => {
+  if (Array.isArray(value)) {
+    return value;
   }
 
-  return source;
+  if (typeof value === "string") {
+    return [value];
+  }
+
+  return [];
 };
 
 type MediaGalleryProps = {
-  images?: (string | null | undefined)[] | null;
-  videos?: (string | null | undefined)[] | null;
+  images?: string[] | string | null;
+  videos?: string[] | string | null;
   title?: string;
 };
 
@@ -121,11 +184,11 @@ const getVideoRenderer = (source: string): VideoRenderer => {
 };
 
 const buildGalleryItems = (images?: MediaGalleryProps["images"], videos?: MediaGalleryProps["videos"]): GalleryItem[] => {
-  const imageItems = (images ?? [])
+  const imageItems = ensureArray(images)
     .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
     .map((source) => ({ type: "image", source: normalizeMediaSource(source) } as const));
 
-  const videoItems = (videos ?? [])
+  const videoItems = ensureArray(videos)
     .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
     .map((source) => ({ type: "video", source: normalizeMediaSource(source) } as const));
 
@@ -136,6 +199,8 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   const items = buildGalleryItems(images, videos);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+
+  // Debug logging removed for production
 
   useEffect(() => {
     if (!api) return;
@@ -157,7 +222,11 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-headline font-semibold">{heading}</h2>
-        {items.length > 0 && <span className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</span>}
+        {items.length > 0 && (
+          <span className="text-sm text-muted-foreground">
+            {items.length} {items.length === 1 ? "item" : "items"}
+          </span>
+        )}
       </div>
 
       <Carousel setApi={setApi} opts={{ align: "center", loop: items.length > 1 }} className="w-full">
@@ -169,12 +238,20 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                 className="relative overflow-hidden rounded-2xl border border-border bg-muted shadow-inner"
               >
                 {item.type === "image" ? (
-                  <img
-                    src={item.source}
-                    alt={`${heading} ${index + 1}`}
-                    loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
+                  // Gebruik een normale img-tag in plaats van Next.js Image component
+                  // om alle optimalisatie en loading issues te omzeilen
+                  <div style={{ position: 'absolute', width: '100%', height: '100%', overflow: 'hidden' }}>
+                    <img 
+                      src={addSizeToImageUrl(item.source, 'racing-gallery')}
+                      alt={`${heading} ${index + 1}`}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                      }}
+                      loading="lazy"
+                    />
+                  </div>
                 ) : (
                   <VideoSlide source={item.source} title={`${heading} video ${index + 1}`} />
                 )}
@@ -197,7 +274,6 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
         )}
       </Carousel>
 
-      {/* Thumbnail grid */}
       {items.length >= 1 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 mt-4">
           {items.map((item, index) => (
@@ -206,16 +282,23 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
               onClick={() => api?.scrollTo(index)}
               className={cn(
                 "relative aspect-video overflow-hidden rounded-lg border-2 transition-all hover:scale-105",
-                current === index
-                  ? "border-primary ring-2 ring-primary/20"
-                  : "border-border opacity-60 hover:opacity-100"
+                current === index ? "border-primary ring-2 ring-primary/20" : "border-border opacity-60 hover:opacity-100",
               )}
             >
               {item.type === "image" ? (
-                <img
-                  src={item.source}
+                // Directe img-tag voor thumbnails
+                <img 
+                  src={addSizeToImageUrl(item.source, 'thumbnail')}
                   alt={`Thumbnail ${index + 1}`}
-                  className="h-full w-full object-cover"
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                  }}
+                  loading="lazy"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-muted">

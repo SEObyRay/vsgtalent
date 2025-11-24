@@ -5,18 +5,14 @@ import type { Metadata } from "next";
 import { Calendar, MapPin, ArrowLeft, Trophy, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MediaGallery } from "@/components/news/MediaGallery";
 import { getWordPressPostBySlug } from "@/lib/wordpress-data";
 import { decodeHtml } from "@/lib/utils";
 import { buildCanonical, SITE_URL } from "@/lib/seo";
 import { buildBreadcrumbsJsonLd } from "@/lib/breadcrumbs";
 import type { WPPost } from "@/types/wordpress";
 
-interface NieuwsDetailParams {
-  params: {
-    slug: string;
-    year: string;
-  };
-}
+type NieuwsRouteParams = Promise<{ slug: string; year: string }>;
 
 const extractFeaturedImage = (post: WPPost | null) => {
   if (!post?._embedded) return null;
@@ -79,8 +75,9 @@ const buildArticleJsonLd = (post: WPPost, featuredImage: string | null, canonica
   };
 };
 
-export async function generateMetadata({ params }: NieuwsDetailParams): Promise<Metadata> {
-  const post = await getWordPressPostBySlug(params.slug);
+export async function generateMetadata({ params }: { params: NieuwsRouteParams }): Promise<Metadata> {
+  const { slug, year } = await params;
+  const post = await getWordPressPostBySlug(slug);
   if (!post) {
     return {
       title: "Wedstrijdverslag | Levy Opbergen",
@@ -92,7 +89,7 @@ export async function generateMetadata({ params }: NieuwsDetailParams): Promise<
   const rawSummary = post.meta?.samenvatting ?? post.excerpt?.rendered ?? "";
   const description =
     decodeHtml(stripHtml(String(rawSummary))) || "Lees het volledige wedstrijdverslag van Levy Opbergen.";
-  const canonicalPath = `/nieuws/${params.year}/${params.slug}`;
+  const canonicalPath = `/nieuws/${year}/${slug}`;
 
   return {
     title,
@@ -120,8 +117,9 @@ export async function generateMetadata({ params }: NieuwsDetailParams): Promise<
   };
 }
 
-export default async function NieuwsDetailPage({ params }: NieuwsDetailParams) {
-  const post = await getWordPressPostBySlug(params.slug);
+export default async function NieuwsDetailPage({ params }: { params: NieuwsRouteParams }) {
+  const { slug, year } = await params;
+  const post = await getWordPressPostBySlug(slug);
   if (!post) {
     notFound();
   }
@@ -131,11 +129,13 @@ export default async function NieuwsDetailPage({ params }: NieuwsDetailParams) {
   const circuit = post?.meta?.circuit ? decodeHtml(post.meta.circuit) : "Onbekend circuit";
   const position = post?.meta?.positie ? Number(post.meta.positie) : null;
   const time = (post.meta as any)?.tijd ? decodeHtml(String((post.meta as any)?.tijd)) : null;
-  const canonicalPath = `/nieuws/${params.year}/${params.slug}`;
+  const canonicalPath = `/nieuws/${year}/${slug}`;
   const rawSummary = post?.meta?.samenvatting ?? post?.excerpt?.rendered ?? "";
   const description =
     decodeHtml(stripHtml(String(rawSummary))) || "Lees het volledige wedstrijdverslag van Levy Opbergen.";
   const articleJsonLd = post ? buildArticleJsonLd(post, featuredImage, canonicalPath) : undefined;
+  const galleryImages = post.meta?.media_gallery ?? null;
+  const galleryVideos = post.meta?.media_videos ?? null;
   
   const breadcrumbsJsonLd = buildBreadcrumbsJsonLd([
     { name: "Home", url: "/" },
@@ -209,6 +209,8 @@ export default async function NieuwsDetailPage({ params }: NieuwsDetailParams) {
             </div>
           )}
         </header>
+
+        <MediaGallery images={galleryImages} videos={galleryVideos} title="Race media" />
 
         <Card className="border-border/60">
           <CardContent className="prose prose-invert max-w-none p-8" dangerouslySetInnerHTML={{ __html: post.content?.rendered ?? "" }} />
