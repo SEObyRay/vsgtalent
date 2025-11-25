@@ -1357,6 +1357,27 @@ class VSGTalent_Setup {
             'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
             'menu_icon' => 'dashicons-calendar-alt',
         ));
+
+        // Custom post type voor sponsors
+        register_post_type('sponsor', array(
+            'labels' => array(
+                'name'          => 'Sponsors',
+                'singular_name' => 'Sponsor',
+                'add_new'       => 'Nieuwe sponsor',
+                'add_new_item'  => 'Nieuwe sponsor toevoegen',
+                'edit_item'     => 'Sponsor bewerken',
+                'new_item'      => 'Nieuwe sponsor',
+                'view_item'     => 'Sponsor bekijken',
+                'search_items'  => 'Sponsors zoeken',
+                'not_found'     => 'Geen sponsors gevonden',
+            ),
+            'public'       => true,
+            'show_in_rest' => true,
+            'rest_base'    => 'sponsors',
+            'has_archive'  => false,
+            'menu_icon'    => 'dashicons-groups',
+            'supports'     => array('title', 'editor', 'thumbnail', 'excerpt'),
+        ));
     }
     
     public function register_taxonomies() {
@@ -1425,6 +1446,36 @@ class VSGTalent_Setup {
         foreach ($meta_fields as $field => $args) {
             $result = register_post_meta('post', $field, $args);
             error_log("VSGTalent: Registered meta field '$field': " . ($result ? 'success' : 'failed'));
+        }
+
+        // Meta velden voor sponsors
+        $sponsor_meta_fields = array(
+            'website' => array(
+                'type'              => 'string',
+                'description'       => 'Website URL van de sponsor',
+                'single'            => true,
+                'sanitize_callback' => 'esc_url_raw',
+                'show_in_rest'      => true,
+            ),
+            'priority' => array(
+                'type'              => 'number',
+                'description'       => 'Weergavevolgorde van de sponsor (lager = hoger in de lijst)',
+                'single'            => true,
+                'sanitize_callback' => 'absint',
+                'show_in_rest'      => true,
+            ),
+            'active' => array(
+                'type'              => 'boolean',
+                'description'       => 'Of de sponsor actief getoond moet worden',
+                'single'            => true,
+                'sanitize_callback' => 'rest_sanitize_boolean',
+                'show_in_rest'      => true,
+            ),
+        );
+
+        foreach ($sponsor_meta_fields as $field => $args) {
+            $result = register_post_meta('sponsor', $field, $args);
+            error_log("VSGTalent: Registered sponsor meta field '$field': " . ($result ? 'success' : 'failed'));
         }
     }
     

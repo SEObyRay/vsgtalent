@@ -13,7 +13,8 @@ export async function getBusinessInfo(): Promise<BusinessInfo> {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch business info: ${response.status}`);
+      console.warn(`Failed to fetch business info from WordPress (status ${response.status}), using defaults.`);
+      return getDefaultBusinessInfo();
     }
 
     const data = await response.json();

@@ -1,5 +1,5 @@
 import { FetchParams, wordpressClient } from "@/lib/wordpress-client";
-import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm } from "@/types/wordpress";
+import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm, WPSponsor } from "@/types/wordpress";
 
 const DEFAULT_COLLECTION_REVALIDATE = 120; // seconds
 const DEFAULT_SINGLE_REVALIDATE = 60; // seconds
@@ -28,6 +28,28 @@ export const getWordPressPostBySlug = async (slug: string): Promise<WPPost | nul
   );
 
   return response.items[0] ?? null;
+};
+
+export const getWordPressSponsorById = async (id: number): Promise<WPSponsor | null> => {
+  if (!id) return null;
+
+  const response = await wordpressClient.fetchSponsors(
+    { per_page: 100, _embed: true, order: "asc" },
+    { revalidateSeconds: DEFAULT_SINGLE_REVALIDATE },
+  );
+
+  return response.items.find((sponsor) => sponsor.id === id) ?? null;
+};
+
+export const getWordPressSponsorBySlug = async (slug: string): Promise<WPSponsor | null> => {
+  if (!slug) return null;
+
+  const response = await wordpressClient.fetchSponsors(
+    { per_page: 100, _embed: true, order: "asc" },
+    { revalidateSeconds: DEFAULT_SINGLE_REVALIDATE },
+  );
+
+  return response.items.find((sponsor) => sponsor.slug === slug) ?? null;
 };
 
 export const getWordPressEventBySlug = async (slug: string): Promise<WPEvent | null> => {

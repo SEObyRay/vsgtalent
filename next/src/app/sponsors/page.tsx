@@ -5,7 +5,15 @@ import { getWordPressSponsors } from "@/lib/wordpress-data";
 import { WPSponsor } from "@/types/wordpress";
 import { Card, CardContent } from "@/components/ui/card";
 
-const pickLogo = (s: WPSponsor) => s.featured_image_url ?? "/placeholder.svg";
+type SponsorEmbeddedMedia = {
+  "wp:featuredmedia"?: Array<{ source_url?: string | null }>;
+};
+
+const pickLogo = (s: WPSponsor) => {
+  const embedded = s._embedded as SponsorEmbeddedMedia | undefined;
+  const media = embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+  return s.featured_image_url ?? media ?? "/placeholder.svg";
+};
 
 export const metadata = {
   title: "Sponsors",
@@ -35,12 +43,9 @@ export default async function SponsorsPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {sponsors.map((s) => {
               const logo = pickLogo(s);
-              const website = s.meta?.website ?? undefined;
-              const Wrapper: ElementType = website ? Link : "div";
-              const wrapperProps = website ? { href: website, target: "_blank", rel: "noopener noreferrer" } : {};
 
               return (
-                <Wrapper key={s.id} {...wrapperProps}>
+                <Link key={s.id} href={`/sponsors/${s.slug}`}>
                   <Card className="group aspect-square bg-card rounded-lg border border-border overflow-hidden hover:border-primary transition-colors duration-300 hover-lift">
                     <CardContent className="w-full h-full p-6 flex items-center justify-center relative">
                       <Image
@@ -52,7 +57,7 @@ export default async function SponsorsPage() {
                       />
                     </CardContent>
                   </Card>
-                </Wrapper>
+                </Link>
               );
             })}
           </div>

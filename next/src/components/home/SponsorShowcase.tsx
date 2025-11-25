@@ -40,10 +40,11 @@ export default async function SponsorShowcase() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
           {sponsors.map((sponsor) => {
             const logo = pickLogo(sponsor);
+
             return (
               <Link
                 key={sponsor.id}
-                href={`/sponsors`}
+                href={`/sponsors/${sponsor.slug}`}
                 className="group aspect-square bg-card rounded-lg border border-border overflow-hidden hover:border-primary transition-colors duration-300 hover-lift"
               >
                 <div className="w-full h-full p-6 flex items-center justify-center relative">

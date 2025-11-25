@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
@@ -28,8 +29,14 @@ const Header = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-gradient-orange rounded-lg flex items-center justify-center font-headline font-bold text-lg hover-glow">
-              VSG
+            <div className="relative h-10 w-10 md:h-12 md:w-12">
+              <Image
+                src="https://wordpress-474222-5959679.cloudwaysapps.com/wp-content/uploads/2025/11/cropped-VSG-Talent-Logo-1080x1080-Transparant.png"
+                alt="VSG Talent logo"
+                fill
+                sizes="48px"
+                className="object-contain drop-shadow-md"
+              />
             </div>
             <div className="hidden sm:flex flex-col leading-tight">
               <span className="font-headline font-bold text-lg">VSG Talent</span>
