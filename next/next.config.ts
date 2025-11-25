@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   port: 3001,
+  env: {
+    NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().toISOString(),
+  },
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "levy-racing-backend.local", pathname: "/**" },
