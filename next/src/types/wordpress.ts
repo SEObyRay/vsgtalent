@@ -27,6 +27,8 @@ export interface WPPostMeta {
   tijd?: string | null;
   media_gallery?: string[] | string | null;
   media_videos?: string[] | string | null;
+  _vsgfb_seo_title?: string | null;
+  _vsgfb_meta_desc?: string | null;
   [key: string]: unknown;
 }
 

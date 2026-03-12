@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
@@ -197,18 +197,22 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   const items = buildGalleryItems(images, videos);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-
-  // Debug logging removed for production
+  const isHoveredRef = useRef(false);
 
   useEffect(() => {
     if (!api) return;
-
     setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
+    api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
+
+  // Auto-slide every 5 s; pause while the pointer is over the gallery
+  useEffect(() => {
+    if (!api || items.length <= 1) return;
+    const id = setInterval(() => {
+      if (!isHoveredRef.current) api.scrollNext();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [api, items.length]);
 
   if (items.length === 0) {
     return null;
@@ -217,7 +221,11 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   const heading = title ?? "Media";
 
   return (
-    <section className="space-y-4">
+    <section
+      className="space-y-4"
+      onMouseEnter={() => { isHoveredRef.current = true; }}
+      onMouseLeave={() => { isHoveredRef.current = false; }}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-headline font-semibold">{heading}</h2>
         {items.length > 0 && (
@@ -251,7 +259,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                     />
                   </div>
                 ) : (
-                  <VideoSlide source={item.source} title={`${heading} video ${index + 1}`} />
+                  <VideoSlide source={item.source} title={`${heading} video ${index + 1}`} isActive={current === index} />
                 )}
                 <span
                   className={cn(
@@ -299,27 +307,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <svg
-                    className="h-6 w-6 text-muted-foreground"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
+                <VideoThumb source={item.source} />
               )}
             </button>
           ))}
@@ -329,16 +317,30 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   );
 };
 
-const VideoSlide = ({ source, title }: { source: string; title: string }) => {
+const VideoSlide = ({ source, title, isActive }: { source: string; title: string; isActive: boolean }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const renderer = getVideoRenderer(source);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isActive) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
+  }, [isActive]);
 
   if (renderer.type === "video") {
     return (
       <video
+        ref={videoRef}
+        muted
+        playsInline
+        loop
         controls
         preload="metadata"
         className="absolute inset-0 h-full w-full object-cover"
-        poster={undefined}
       >
         <source src={renderer.src} />
         Uw browser ondersteunt de video-tag niet.
@@ -355,6 +357,28 @@ const VideoSlide = ({ source, title }: { source: string; title: string }) => {
       allowFullScreen
       loading="lazy"
     />
+  );
+};
+
+const VideoThumb = ({ source }: { source: string }) => {
+  const renderer = getVideoRenderer(source);
+  if (renderer.type === "video") {
+    return (
+      <video
+        src={renderer.src}
+        preload="metadata"
+        muted
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover pointer-events-none"
+      />
+    );
+  }
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-muted">
+      <svg className="h-6 w-6 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </div>
   );
 };
 

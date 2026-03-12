@@ -92,8 +92,11 @@ export async function generateMetadata({ params }: { params: NieuwsRouteParams }
   }
 
   const featuredImage = extractFeaturedImage(post) ?? `${SITE_URL}/og-image.jpg`;
-  const title = `${decodeHtml(post.title.rendered)} | Wedstrijdverslag Levy Opbergen`;
-  const rawSummary = post.meta?.samenvatting ?? post.excerpt?.rendered ?? "";
+  const seoTitle = post.meta?._vsgfb_seo_title;
+  const title = seoTitle
+    ? `${decodeHtml(seoTitle)} | Levy Opbergen`
+    : `${decodeHtml(post.title.rendered)} | Wedstrijdverslag Levy Opbergen`;
+  const rawSummary = post.meta?._vsgfb_meta_desc ?? post.meta?.samenvatting ?? post.excerpt?.rendered ?? "";
   const description =
     decodeHtml(stripHtml(String(rawSummary))) || "Lees het volledige wedstrijdverslag van Levy Opbergen.";
   const canonicalPath = `/nieuws/${year}/${slug}`;
@@ -137,7 +140,7 @@ export default async function NieuwsDetailPage({ params }: { params: NieuwsRoute
   const position = typeof post?.meta?.positie === "number" ? post.meta.positie : null;
   const time = post.meta?.tijd ? decodeHtml(String(post.meta.tijd)) : null;
   const canonicalPath = `/nieuws/${year}/${slug}`;
-  const rawSummary = post?.meta?.samenvatting ?? post?.excerpt?.rendered ?? "";
+  const rawSummary = post?.meta?._vsgfb_meta_desc ?? post?.meta?.samenvatting ?? post?.excerpt?.rendered ?? "";
   const description =
     decodeHtml(stripHtml(String(rawSummary))) || "Lees het volledige wedstrijdverslag van Levy Opbergen.";
   const articleJsonLd = post ? buildArticleJsonLd(post, featuredImage, canonicalPath) : undefined;
