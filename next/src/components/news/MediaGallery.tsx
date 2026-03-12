@@ -250,6 +250,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                     <img 
                       src={addSizeToImageUrl(item.source, 'racing-gallery')}
                       alt={`${heading} ${index + 1}`}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = item.source; }}
                       style={{ 
                         width: '100%', 
                         height: '100%', 
@@ -296,6 +297,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                 <img 
                   src={addSizeToImageUrl(item.source, 'thumbnail')}
                   alt={`Thumbnail ${index + 1}`}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = item.source; }}
                   style={{ 
                     width: '100%', 
                     height: '100%', 
