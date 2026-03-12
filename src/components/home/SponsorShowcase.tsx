@@ -1,18 +1,22 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useWordPressSponsors } from "@/hooks/use-wordpress";
+import type { WPSponsor } from "@/types/wordpress";
 
-// Mock sponsor data - replace with WordPress GraphQL later
-const sponsors = [
-  { id: 1, name: "Sponsor 1", logo: "/placeholder.svg", tier: "main" },
-  { id: 2, name: "Sponsor 2", logo: "/placeholder.svg", tier: "main" },
-  { id: 3, name: "Sponsor 3", logo: "/placeholder.svg", tier: "main" },
-  { id: 4, name: "Sponsor 4", logo: "/placeholder.svg", tier: "secondary" },
-  { id: 5, name: "Sponsor 5", logo: "/placeholder.svg", tier: "secondary" },
-  { id: 6, name: "Sponsor 6", logo: "/placeholder.svg", tier: "secondary" },
-];
+const pickLogo = (s: WPSponsor): string | null => {
+  if (s.featured_image_url) return s.featured_image_url;
+  const embedded = s._embedded as { "wp:featuredmedia"?: Array<{ source_url?: string }> } | undefined;
+  return embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null;
+};
 
 const SponsorShowcase = () => {
+  const { data } = useWordPressSponsors({ per_page: 12, _embed: true, order: "asc" });
+
+  const sponsors = (data?.items ?? [])
+    .filter((s) => s.meta?.active !== false)
+    .sort((a, b) => (a.meta?.priority ?? 999) - (b.meta?.priority ?? 999));
+
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
@@ -25,24 +29,35 @@ const SponsorShowcase = () => {
           </p>
         </div>
 
-        {/* Sponsor Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
-          {sponsors.map((sponsor) => (
-            <Link
-              key={sponsor.id}
-              to={`/sponsors/${sponsor.id}`}
-              className="group aspect-square bg-card rounded-lg border border-border overflow-hidden hover:border-primary transition-smooth hover-lift"
-            >
-              <div className="w-full h-full p-6 flex items-center justify-center">
-                <img
-                  src={sponsor.logo}
-                  alt={sponsor.name}
-                  className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-smooth"
-                />
-              </div>
-            </Link>
-          ))}
-        </div>
+        {sponsors.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
+            {sponsors.map((sponsor) => {
+              const logo = pickLogo(sponsor);
+              const name = sponsor.title?.rendered || "Sponsor";
+              const initials = name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+              return (
+                <Link
+                  key={sponsor.id}
+                  to={`/sponsors/${sponsor.slug}`}
+                  className="group aspect-square bg-card rounded-lg border border-border overflow-hidden hover:border-primary transition-smooth hover-lift flex items-center justify-center p-6"
+                >
+                  {logo ? (
+                    <img
+                      src={logo}
+                      alt={name}
+                      className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-smooth"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-2xl font-headline font-bold text-primary">{initials}</span>
+                      <span className="text-xs text-center text-muted-foreground leading-tight">{name}</span>
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         {/* CTA */}
         <div className="bg-gradient-to-r from-card to-secondary rounded-2xl p-8 md:p-12 text-center shadow-soft">
@@ -54,18 +69,14 @@ const SponsorShowcase = () => {
             en profiteer van exclusieve voordelen.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
-              size="lg"
-              className="gradient-orange shadow-orange hover-lift"
-            >
+            <Button asChild size="lg" className="gradient-orange shadow-orange hover-lift">
               <Link to="/club-van-100" className="flex items-center gap-2">
                 Bekijk Mogelijkheden
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/sponsors">Alle Sponsors</Link>
+              <Link to="/sponsors">Alle Partners</Link>
             </Button>
           </div>
         </div>

@@ -57,6 +57,19 @@ export interface WPEvent extends WPBaseEntity {
   _embedded?: Record<string, unknown>;
 }
 
+export interface WPSponsorMeta {
+  website?: string | null;
+  tier?: string | null;
+  priority?: number | null;
+  active?: boolean | null;
+  [key: string]: unknown;
+}
+
+export interface WPSponsor extends WPBaseEntity {
+  meta: WPSponsorMeta;
+  _embedded?: Record<string, unknown>;
+}
+
 export interface WPTaxonomyTerm {
   id: number;
   count: number;

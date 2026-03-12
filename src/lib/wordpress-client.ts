@@ -1,4 +1,4 @@
-import { WPEvent, WPPost, WPRestCollectionResponse, WPTaxonomyTerm, WPSettings } from "@/types/wordpress";
+import { WPEvent, WPPost, WPRestCollectionResponse, WPSponsor, WPTaxonomyTerm, WPSettings } from "@/types/wordpress";
 
 export type FetchParams = Record<string, string | number | boolean | undefined | string[] | number[]>;
 
@@ -105,6 +105,11 @@ export const wordpressClient = {
   fetchTaxonomy: (taxonomy: string, params?: FetchParams) =>
     fetchCollection<WPTaxonomyTerm>(`/wp/v2/${taxonomy}`, params),
   fetchSettings: () => fetchJson<WPSettings>("/vsgtalent/v1/settings"),
+  fetchSponsors: (params?: FetchParams) => fetchCollection<WPSponsor>("/wp/v2/sponsors", params),
+  fetchSponsorBySlug: async (slug: string): Promise<WPSponsor | null> => {
+    const res = await fetchCollection<WPSponsor>("/wp/v2/sponsors", { slug, per_page: 1, _embed: true });
+    return res.items[0] ?? null;
+  },
 };
 
 export type WordPressClient = typeof wordpressClient;

@@ -1,6 +1,6 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { wordpressClient, type FetchParams } from "@/lib/wordpress-client";
-import { WPEvent, WPPost, WPTaxonomyTerm, WPRestCollectionResponse, WPSettings } from "@/types/wordpress";
+import { WPEvent, WPPost, WPSponsor, WPTaxonomyTerm, WPRestCollectionResponse, WPSettings } from "@/types/wordpress";
 
 const defaultQueryOptions = {
   staleTime: 0,
@@ -67,6 +67,29 @@ export const useWordPressPostBySlug = (
       });
       return response.items[0] ?? null;
     },
+    ...defaultQueryOptions,
+    ...options,
+  });
+
+export const useWordPressSponsors = (
+  params?: FetchParams,
+  options?: UseQueryOptions<WPRestCollectionResponse<WPSponsor>>,
+) =>
+  useQuery<WPRestCollectionResponse<WPSponsor>>({
+    queryKey: ["wp-sponsors", params],
+    queryFn: () => wordpressClient.fetchSponsors(params),
+    ...defaultQueryOptions,
+    ...options,
+  });
+
+export const useWordPressSponsorBySlug = (
+  slug: string,
+  options?: UseQueryOptions<WPSponsor | null>,
+) =>
+  useQuery<WPSponsor | null>({
+    queryKey: ["wp-sponsor", slug],
+    queryFn: () => wordpressClient.fetchSponsorBySlug(slug),
+    enabled: !!slug,
     ...defaultQueryOptions,
     ...options,
   });

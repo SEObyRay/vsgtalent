@@ -11,6 +11,7 @@ const NieuwsDetail = lazy(() => import("./pages/NieuwsDetail"));
 const Agenda = lazy(() => import("./pages/Agenda"));
 const AgendaDetail = lazy(() => import("./pages/AgendaDetail"));
 const Sponsors = lazy(() => import("./pages/Sponsors"));
+const SponsorDetail = lazy(() => import("./pages/SponsorDetail"));
 const OverLevy = lazy(() => import("./pages/OverLevy"));
 const ClubVan100 = lazy(() => import("./pages/ClubVan100"));
 const Media = lazy(() => import("./pages/Media"));
@@ -39,6 +40,8 @@ const App = () => (
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/agenda/:year/:slug" element={<AgendaDetail />} />
             <Route path="/sponsors" element={<Sponsors />} />
+            <Route path="/sponsors/:slug" element={<SponsorDetail />} />
+            <Route path="/sponsor/:slug" element={<SponsorDetail />} />
             <Route path="/over-levy" element={<OverLevy />} />
             <Route path="/club-van-100" element={<ClubVan100 />} />
             <Route path="/media" element={<Media />} />
