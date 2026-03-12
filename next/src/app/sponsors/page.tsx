@@ -40,24 +40,41 @@ export default async function SponsorsPage() {
       <div className="container mx-auto px-4">
         <h1 className="text-4xl md:text-5xl font-headline font-bold mb-4 text-center">Partners &amp; Sponsoren</h1>
         <p className="text-muted-foreground mb-10 text-center max-w-2xl mx-auto">
-          Binnenkort komt hier het overzicht van alle partners die Levy richting de top helpen.
+          {sponsors.length > 0
+            ? "De partners en sponsoren die Levy's racecarrière mogelijk maken."
+            : "Binnenkort komt hier het overzicht van alle partners die Levy richting de top helpen."}
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {visibleSponsors.map((s, index) => {
             const logo = pickLogo(s);
+            const hasLogo = logo !== "/placeholder.svg";
+            const name = s.title?.rendered || `Sponsor ${index + 1}`;
+            const initials = name
+              .split(/\s+/)
+              .slice(0, 2)
+              .map((w: string) => w[0])
+              .join("")
+              .toUpperCase();
 
             return (
               <Link key={s.id} href={`/sponsors/${s.slug}`}>
                 <Card className="group aspect-square bg-card rounded-2xl border border-border/80 overflow-hidden hover:border-primary transition-colors duration-300 hover-lift">
-                  <CardContent className="w-full h-full p-6 flex items-center justify-center relative">
-                    <Image
-                      src={logo}
-                      alt={s.title?.rendered || `Sponsor slot ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                      className="object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
-                    />
+                  <CardContent className="w-full h-full p-4 flex flex-col items-center justify-center relative gap-2">
+                    {hasLogo ? (
+                      <Image
+                        src={logo}
+                        alt={name}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                        className="object-contain grayscale group-hover:grayscale-0 transition-all duration-300 p-4"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-2xl font-headline font-bold text-primary">{initials}</span>
+                        <span className="text-xs text-center font-medium text-muted-foreground leading-tight">{name}</span>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               </Link>

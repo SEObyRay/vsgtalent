@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  port: 3001,
   env: {
     NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().toISOString(),
   },
@@ -28,6 +27,20 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: false,
+  },
+  async redirects() {
+    return [
+      {
+        source: "/sponsor/:slug",
+        destination: "/sponsors/:slug",
+        permanent: true,
+      },
+      {
+        source: "/sponsor/:slug/",
+        destination: "/sponsors/:slug",
+        permanent: true,
+      },
+    ];
   },
   async rewrites() {
     return {
