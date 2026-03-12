@@ -6,6 +6,10 @@
   "devCommand": "npm run dev",
   "rewrites": [
     {
+      "source": "/wp-content/:path*",
+      "destination": "https://wordpress-474222-5959679.cloudwaysapps.com/wp-content/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
