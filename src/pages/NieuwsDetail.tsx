@@ -33,6 +33,15 @@ const extractFeaturedImage = (post: WPPost | null) => {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
 
+/** Extract a circuit/location hint from a post title using the "op [Location]" pattern. */
+const extractCircuitFromTitle = (title: string): string | null => {
+  const m = decodeHtml(title).match(/\bop\s+([A-ZÀ-Ÿ][a-zA-ZÀ-ÿ\-]{2,}(?:\s+[A-ZÀ-Ÿ][a-zA-ZÀ-ÿ\-]+)*)/);
+  if (!m) return null;
+  const candidate = m[1].trim();
+  // Reject competition codes that contain digits (e.g. "NK4T")
+  return /\d/.test(candidate) ? null : candidate;
+};
+
 const formatDate = (date?: string) => {
   if (!date) return "Onbekende datum";
   return new Date(date).toLocaleDateString("nl-NL", {
@@ -57,7 +66,13 @@ const NieuwsDetail = () => {
   const featuredImage = useMemo(() => extractFeaturedImage(post), [post]);
   const { competition, season } = useMemo(() => extractTerms(post), [post]);
 
-  const circuit = post?.meta?.circuit ? decodeHtml(String(post.meta.circuit)) : "Onbekend circuit";
+  const rawCircuit = post?.meta?.circuit ? decodeHtml(String(post.meta.circuit)) : "";
+  const titleCircuit = post ? extractCircuitFromTitle(post.title.rendered) : null;
+  const circuit = (() => {
+    if (!rawCircuit) return titleCircuit ?? "Onbekend circuit";
+    if (titleCircuit && !rawCircuit.toLowerCase().includes(titleCircuit.toLowerCase())) return titleCircuit;
+    return rawCircuit;
+  })();
   const position = post?.meta?.positie ? Number(post.meta.positie) : null;
 
   const canonicalPath = year && slug ? `/nieuws/${year}/${slug}` : "/nieuws";
