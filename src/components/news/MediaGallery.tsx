@@ -136,6 +136,17 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   const items = buildGalleryItems(images, videos);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [failedSources, setFailedSources] = useState<Set<string>>(() => new Set());
+
+  const handleMediaError = (src: string) => {
+    setFailedSources((prev) => {
+      const next = new Set(prev);
+      next.add(src);
+      return next;
+    });
+  };
+
+  const visibleItems = items.filter((item) => !failedSources.has(item.source));
 
   useEffect(() => {
     if (!api) return;
@@ -147,7 +158,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
     });
   }, [api]);
 
-  if (items.length === 0) {
+  if (visibleItems.length === 0) {
     return null;
   }
 
@@ -157,13 +168,13 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-headline font-semibold">{heading}</h2>
-        {items.length > 0 && <span className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</span>}
+        <span className="text-sm text-muted-foreground">{visibleItems.length} {visibleItems.length === 1 ? 'item' : 'items'}</span>
       </div>
 
-      <Carousel setApi={setApi} opts={{ align: "center", loop: items.length > 1 }} className="w-full">
+      <Carousel setApi={setApi} opts={{ align: "center", loop: visibleItems.length > 1 }} className="w-full">
         <CarouselContent className="-ml-2 md:-ml-4">
-          {items.map((item, index) => (
-            <CarouselItem key={`${item.type}-${index}`} className="pl-2 md:pl-4">
+          {visibleItems.map((item, index) => (
+            <CarouselItem key={`${item.type}-${item.source}`} className="pl-2 md:pl-4">
               <AspectRatio
                 ratio={16 / 9}
                 className="relative overflow-hidden rounded-2xl border border-border bg-muted shadow-inner"
@@ -174,9 +185,10 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                     alt={`${heading} ${index + 1}`}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"
+                    onError={() => handleMediaError(item.source)}
                   />
                 ) : (
-                  <VideoSlide source={item.source} title={`${heading} video ${index + 1}`} />
+                  <VideoSlide source={item.source} title={`${heading} video ${index + 1}`} onError={handleMediaError} />
                 )}
                 <span
                   className={cn(
@@ -189,7 +201,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        {items.length > 1 && (
+        {visibleItems.length > 1 && (
           <div className="hidden sm:block">
             <CarouselPrevious className="-left-6 top-1/2 h-10 w-10 -translate-y-1/2 border-border bg-background/90 shadow-lg hover:bg-background" />
             <CarouselNext className="-right-6 top-1/2 h-10 w-10 -translate-y-1/2 border-border bg-background/90 shadow-lg hover:bg-background" />
@@ -198,11 +210,11 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
       </Carousel>
 
       {/* Thumbnail grid */}
-      {items.length >= 1 && (
+      {visibleItems.length >= 1 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 mt-4">
-          {items.map((item, index) => (
+          {visibleItems.map((item, index) => (
             <button
-              key={`thumb-${index}`}
+              key={`thumb-${item.source}`}
               onClick={() => api?.scrollTo(index)}
               className={cn(
                 "relative aspect-video overflow-hidden rounded-lg border-2 transition-all hover:scale-105",
@@ -216,6 +228,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                   src={item.source}
                   alt={`Thumbnail ${index + 1}`}
                   className="h-full w-full object-cover"
+                  onError={() => handleMediaError(item.source)}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -248,7 +261,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   );
 };
 
-const VideoSlide = ({ source, title }: { source: string; title: string }) => {
+const VideoSlide = ({ source, title, onError }: { source: string; title: string; onError?: (src: string) => void }) => {
   const renderer = getVideoRenderer(source);
 
   if (renderer.type === "video") {
@@ -258,6 +271,7 @@ const VideoSlide = ({ source, title }: { source: string; title: string }) => {
         preload="metadata"
         className="absolute inset-0 h-full w-full object-cover"
         poster={undefined}
+        onError={() => onError?.(source)}
       >
         <source src={renderer.src} />
         Uw browser ondersteunt de video-tag niet.
