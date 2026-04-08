@@ -16,6 +16,7 @@ import {
 import { buildCanonical } from "@/lib/seo";
 
 const Agenda = () => {
+  const showWordPressWarning = import.meta.env.DEV;
   const { data, isLoading, isError } = useWordPressEvents({
     per_page: 100,
     order: "asc",
@@ -139,9 +140,9 @@ const Agenda = () => {
           <div className="mb-16">
             <h2 className="text-3xl font-headline font-bold mb-8">Aankomende Races</h2>
             {isLoading && <div className="text-muted-foreground">Evenementen worden geladen...</div>}
-            {isError && !isLoading && (
-              <div className="text-destructive">
-                WordPress-events konden niet worden geladen. De agenda toont daarom de ingevoerde seizoenskalender.
+            {showWordPressWarning && isError && !isLoading && (
+              <div className="text-sm text-muted-foreground">
+                WordPress-events konden niet worden geladen. De agenda toont daarom tijdelijk de ingevoerde seizoenskalender.
               </div>
             )}
             {!isLoading && upcomingEvents.length === 0 && (

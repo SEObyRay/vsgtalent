@@ -97,11 +97,44 @@ const fetchCollection = async <T>(path: string, params?: FetchParams): Promise<W
   return withCollectionMeta(data, response);
 };
 
+const fetchJsonWithFallback = async <T>(paths: string[], params?: FetchParams): Promise<T> => {
+  let lastError: Error | null = null;
+
+  for (const path of paths) {
+    try {
+      return await fetchJson<T>(path, params);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  throw lastError ?? new Error("Request failed");
+};
+
+const fetchCollectionWithFallback = async <T>(
+  paths: string[],
+  params?: FetchParams,
+): Promise<WPRestCollectionResponse<T>> => {
+  let lastError: Error | null = null;
+
+  for (const path of paths) {
+    try {
+      return await fetchCollection<T>(path, params);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  throw lastError ?? new Error("Request failed");
+};
+
 export const wordpressClient = {
   fetchPosts: (params?: FetchParams) => fetchCollection<WPPost>("/wp/v2/posts", params),
   fetchPost: (id: number) => fetchJson<WPPost>(`/wp/v2/posts/${id}`),
-  fetchEvents: (params?: FetchParams) => fetchCollection<WPEvent>("/wp/v2/evenementen", params),
-  fetchEvent: (id: number) => fetchJson<WPEvent>(`/wp/v2/evenementen/${id}`),
+  fetchEvents: (params?: FetchParams) =>
+    fetchCollectionWithFallback<WPEvent>(["/wp/v2/evenementen", "/wp/v2/evenement"], params),
+  fetchEvent: (id: number) =>
+    fetchJsonWithFallback<WPEvent>([`/wp/v2/evenementen/${id}`, `/wp/v2/evenement/${id}`]),
   fetchTaxonomy: (taxonomy: string, params?: FetchParams) =>
     fetchCollection<WPTaxonomyTerm>(`/wp/v2/${taxonomy}`, params),
   fetchSettings: () => fetchJson<WPSettings>("/vsgtalent/v1/settings"),

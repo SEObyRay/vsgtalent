@@ -1468,6 +1468,7 @@ class VSGTalent_Setup {
             ),
             'public' => true,
             'show_in_rest' => true,
+            'rest_base' => 'evenementen',
             'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
             'menu_icon' => 'dashicons-calendar-alt',
         ));
