@@ -4,11 +4,11 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Clock, ArrowLeft } from "lucide-react";
-import { decodeHtml } from "@/lib/utils";
 import { useWordPressEventBySlug } from "@/hooks/use-wordpress";
 import type { WPEvent } from "@/types/wordpress";
 import PageSeo from "@/components/seo/PageSeo";
 import { buildCanonical } from "@/lib/seo";
+import { findAgendaEventBySlug, formatAgendaDate } from "@/lib/agenda";
 
 const extractFeaturedImage = (event: WPEvent | null) => {
   if (!event?._embedded) return null;
@@ -16,40 +16,32 @@ const extractFeaturedImage = (event: WPEvent | null) => {
   return media?.source_url || null;
 };
 
-const formatDate = (date?: string) => {
-  if (!date) return "Onbekende datum";
-  return new Date(date).toLocaleDateString("nl-NL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
-
 const AgendaDetail = () => {
   const { slug, year } = useParams();
   const navigate = useNavigate();
 
   const { data: event, isLoading, isError } = useWordPressEventBySlug(slug ?? "");
+  const resolvedEvent = useMemo(() => findAgendaEventBySlug(slug ?? "", event), [event, slug]);
 
   const featuredImage = useMemo(() => extractFeaturedImage(event), [event]);
 
-  const location = event?.meta?.locatie ? decodeHtml(event.meta.locatie) : "Onbekend Circuit";
-  const address = event?.meta?.adres ? decodeHtml(event.meta.adres) : "";
-  const city = event?.meta?.stad ? decodeHtml(event.meta.stad) : "";
-  const klasse = event?.meta?.klasse ? decodeHtml(event.meta.klasse) : "";
-  const time = event?.meta?.tijd ? decodeHtml(event.meta.tijd) : "Tijd nog niet bekend";
+  const location = resolvedEvent?.venue || "Onbekend Circuit";
+  const address = resolvedEvent?.address || "";
+  const city = resolvedEvent?.city || "";
+  const klasse = resolvedEvent?.series || resolvedEvent?.klasse || "";
+  const time = resolvedEvent?.time || "Tijd nog niet bekend";
   const canonicalPath = year && slug ? `/agenda/${year}/${slug}` : "/agenda";
-  const description = event
-    ? `${formatDate(event.meta?.datum)} • ${location}${city ? ` (${city})` : ""}`
+  const description = resolvedEvent
+    ? `${formatAgendaDate(resolvedEvent.startDate)} • ${location}${city ? ` (${city})` : ""}`
     : "Bekijk details van dit evenement op de race agenda van Levy Opbergen.";
 
-  const eventJsonLd = event
+  const eventJsonLd = resolvedEvent
     ? {
         "@context": "https://schema.org",
         "@type": "SportsEvent",
-        name: decodeHtml(event.title.rendered),
-        startDate: event.meta?.datum ? new Date(event.meta.datum).toISOString() : undefined,
-        endDate: event.meta?.einddatum ? new Date(event.meta.einddatum).toISOString() : undefined,
+        name: resolvedEvent.title,
+        startDate: resolvedEvent.startDate ? new Date(resolvedEvent.startDate).toISOString() : undefined,
+        endDate: resolvedEvent.endDate ? new Date(resolvedEvent.endDate).toISOString() : undefined,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
         location: {
@@ -66,7 +58,7 @@ const AgendaDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title={event ? `${decodeHtml(event.title.rendered)} | Race Agenda Levy Opbergen` : "Race agenda evenement"}
+        title={resolvedEvent ? `${resolvedEvent.title} | Race Agenda Levy Opbergen` : "Race agenda evenement"}
         description={description}
         path={canonicalPath}
         type="event"
@@ -82,14 +74,14 @@ const AgendaDetail = () => {
 
           {isLoading && <div className="text-muted-foreground">Evenement wordt geladen...</div>}
           {isError && !isLoading && (
-            <div className="text-destructive">Kon het evenement niet ophalen. Probeer later opnieuw.</div>
+            <div className="text-destructive">WordPress-event kon niet worden opgehaald. De detailpagina toont waar mogelijk de ingevoerde kalenderinformatie.</div>
           )}
 
-          {!isLoading && !event && !isError && (
+          {!isLoading && !resolvedEvent && !isError && (
             <div className="text-muted-foreground">Evenement niet gevonden.</div>
           )}
 
-          {event && (
+          {resolvedEvent && (
             <article className="space-y-10">
               <header className="space-y-4">
                 <div className="space-y-2">
@@ -97,15 +89,18 @@ const AgendaDetail = () => {
                     {klasse || "Karting"}
                   </span>
                   <h1 className="text-4xl md:text-5xl font-headline font-bold">
-                    {decodeHtml(event.title.rendered)}
+                    {resolvedEvent.title}
                   </h1>
+                  {resolvedEvent.roundLabel && (
+                    <p className="text-muted-foreground">{resolvedEvent.roundLabel}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    {formatDate(event.meta?.datum)}
-                    {event.meta?.einddatum ? ` – ${formatDate(event.meta.einddatum)}` : ""}
+                    {formatAgendaDate(resolvedEvent.startDate)}
+                    {resolvedEvent.endDate ? ` – ${formatAgendaDate(resolvedEvent.endDate)}` : ""}
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
@@ -126,14 +121,22 @@ const AgendaDetail = () => {
                   <div className="overflow-hidden rounded-3xl border border-border">
                     <img
                       src={featuredImage}
-                      alt={decodeHtml(event.title.rendered)}
+                      alt={resolvedEvent.title}
                       className="w-full h-auto object-cover"
                     />
                   </div>
                 )}
               </header>
 
-              <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: event.content?.rendered ?? "" }} />
+              <div
+                className="prose prose-invert max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    event?.content?.rendered ||
+                    resolvedEvent.content ||
+                    `<p>${resolvedEvent.summary || "Meer informatie over dit raceweekend volgt."}</p>`,
+                }}
+              />
             </article>
           )}
         </div>

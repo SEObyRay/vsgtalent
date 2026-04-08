@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useWordPressPosts } from "@/hooks/use-wordpress";
+import { getPostCircuitLabel } from "@/lib/post-location";
 import { decodeHtml } from "@/lib/utils";
 import type { WPPost } from "@/types/wordpress";
 
@@ -18,9 +19,9 @@ const extractFeaturedImage = (post: WPPost) => {
 const mockNews = [
   {
     id: 1,
-    title: "Podium Finish in Rotax Max Challenge Nederland",
-    slug: "podium-rotax-max-challenge-2024",
-    excerpt: "Fantastisch weekend in Lelystad met een 2e plaats in de finale!",
+    title: "Podium in Chrono NK 4T",
+    slug: "podium-chrono-nk-4t-2024",
+    excerpt: "Sterk weekend in de Parolin Rocky 200cc-klasse met een podiumplek als beloning.",
     date: "2024-10-15",
     circuit: "Raceway Lelystad",
     position: 2,
@@ -28,9 +29,9 @@ const mockNews = [
   },
   {
     id: 2,
-    title: "Seizoensopener IAME X30 Challenge",
-    slug: "seizoensopener-iame-x30-2024",
-    excerpt: "Start van het seizoen met een goede 5e plaats ondanks technische problemen.",
+    title: "Seizoensopener bij NXTGP Dutch Open",
+    slug: "seizoensopener-nxtgp-dutch-open-2024",
+    excerpt: "Goede eerste meters in de Parolin Rocky 200cc-klasse tijdens de seizoensstart.",
     date: "2024-09-20",
     circuit: "Circuit Zandvoort",
     position: 5,
@@ -38,9 +39,9 @@ const mockNews = [
   },
   {
     id: 3,
-    title: "Overwinning in ONK Karting",
-    slug: "overwinning-onk-karting-2024",
-    excerpt: "Pole position en racewinst! Een perfecte dag op het circuit.",
+    title: "Sterke racedag in Parolin Rocky 200cc",
+    slug: "sterke-racedag-parolin-rocky-200cc-2024",
+    excerpt: "Snelle progressie en een overtuigende racedag binnen de klasse Parolin Rocky 200cc.",
     date: "2024-08-12",
     circuit: "Kartcircuit Berghem",
     position: 1,
@@ -65,7 +66,7 @@ const LatestNews = () => {
       slug: post.slug,
       excerpt: decodeHtml(stripHtml(post.excerpt?.rendered ?? "")),
       date: post.date,
-      circuit: (post.meta as any)?.circuit ?? "Onbekend Circuit",
+      circuit: getPostCircuitLabel(post),
       position: (post.meta as any)?.positie ?? null,
       image: extractFeaturedImage(post) || "/placeholder.svg",
     })) ?? [];

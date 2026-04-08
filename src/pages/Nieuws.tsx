@@ -7,6 +7,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import { useWordPressPosts, useWordPressTaxonomy } from "@/hooks/use-wordpress";
+import { getPostCircuitLabel } from "@/lib/post-location";
 import { decodeHtml } from "@/lib/utils";
 import type { WPPost } from "@/types/wordpress";
 import PageSeo from "@/components/seo/PageSeo";
@@ -228,7 +229,7 @@ const Nieuws = () => {
                     </div>
                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>{article.meta.circuit || "Onbekend Circuit"}</span>
+                      <span>{getPostCircuitLabel(article)}</span>
                     </div>
                     <div className="text-xs font-medium text-primary">
                       {getCompetitionLabel(article) || ""}

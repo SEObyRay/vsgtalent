@@ -1,72 +1,38 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight, Calendar, Clock, Download, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Clock, Download, ArrowRight } from "lucide-react";
-
-// Mock data - replace with WordPress GraphQL later
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Rotax Max Challenge - Ronde 3",
-    slug: "rotax-max-challenge-ronde-3-2025",
-    date: "2025-04-12",
-    endDate: "2025-04-13",
-    venue: "Circuit Park Berghem",
-    city: "Berghem",
-    time: "09:00 - 18:00",
-    isNextRace: true,
-  },
-  {
-    id: 2,
-    title: "IAME X30 Challenge - Finale",
-    slug: "iame-x30-challenge-finale-2025",
-    date: "2025-05-03",
-    endDate: "2025-05-04",
-    venue: "Kartbaan Genk",
-    city: "Genk, België",
-    time: "08:30 - 19:00",
-    isNextRace: false,
-  },
-  {
-    id: 3,
-    title: "ONK Karting - Ronde 2",
-    slug: "onk-karting-ronde-2-2025",
-    date: "2025-05-17",
-    endDate: "2025-05-18",
-    venue: "Raceway Venray",
-    city: "Venray",
-    time: "09:00 - 17:30",
-    isNextRace: false,
-  },
-];
+import { useWordPressEvents } from "@/hooks/use-wordpress";
+import {
+  formatAgendaDate,
+  getAgendaEventYear,
+  getDaysUntilAgendaEvent,
+  mergeAgendaEvents,
+} from "@/lib/agenda";
 
 const AgendaWidget = () => {
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  const { data } = useWordPressEvents({
+    per_page: 100,
+    order: "asc",
+  });
 
-  const getDaysUntil = (dateStr: string) => {
+  const upcomingEvents = useMemo(() => {
     const today = new Date();
-    const eventDate = new Date(dateStr);
-    const diffTime = eventDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+    today.setHours(0, 0, 0, 0);
+    return mergeAgendaEvents(data?.items ?? [])
+      .filter((event) => new Date(event.startDate) >= today)
+      .slice(0, 3);
+  }, [data]);
 
   return (
     <section className="py-20 bg-card/30">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h2 className="text-4xl md:text-5xl font-headline font-bold mb-4">
-              Race Agenda
-            </h2>
+            <h2 className="text-4xl md:text-5xl font-headline font-bold mb-4">Race Agenda</h2>
             <p className="text-muted-foreground text-lg">
-              Aankomende races en evenementen
+              De eerstvolgende races uit de seizoensplanning
             </p>
           </div>
           <div className="hidden md:flex gap-3">
@@ -84,8 +50,8 @@ const AgendaWidget = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {upcomingEvents.map((event, index) => {
-            const daysUntil = getDaysUntil(event.date);
+          {upcomingEvents.map((event) => {
+            const daysUntil = getDaysUntilAgendaEvent(event.startDate);
             return (
               <Card
                 key={event.id}
@@ -93,25 +59,32 @@ const AgendaWidget = () => {
                   event.isNextRace ? "ring-2 ring-primary shadow-orange" : ""
                 }`}
               >
-                <Link to={`/agenda/${event.slug}`}>
+                <Link to={`/agenda/${getAgendaEventYear(event)}/${event.slug}`}>
                   <CardContent className="p-6 space-y-4">
                     {event.isNextRace && (
                       <div className="inline-flex px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold animate-pulse-glow">
-                        🏁 Volgende Race
+                        Volgende Race
                       </div>
                     )}
 
                     <div>
+                      <div className="text-xs uppercase tracking-wide text-primary/80 mb-2">
+                        {event.klasse || event.series || "Race"}
+                      </div>
                       <h3 className="font-headline font-semibold text-xl group-hover:text-primary transition-smooth mb-2">
                         {event.title}
                       </h3>
-                      
+                      {event.roundLabel && (
+                        <div className="text-sm text-muted-foreground mb-3">{event.roundLabel}</div>
+                      )}
+
                       <div className="space-y-2 text-sm text-muted-foreground">
                         <div className="flex items-start gap-2">
                           <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" />
                           <div>
                             <div className="font-medium text-foreground">
-                              {formatDate(event.date)}
+                              {formatAgendaDate(event.startDate)}
+                              {event.endDate ? ` - ${formatAgendaDate(event.endDate)}` : ""}
                             </div>
                             {daysUntil > 0 && (
                               <div className="text-xs">
@@ -124,15 +97,17 @@ const AgendaWidget = () => {
                         <div className="flex items-start gap-2">
                           <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" />
                           <div>
-                            <div>{event.venue}</div>
-                            <div className="text-xs">{event.city}</div>
+                            <div>{event.venue || "Locatie volgt"}</div>
+                            <div className="text-xs">{event.city || event.address || ""}</div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 flex-shrink-0 text-primary" />
-                          <span>{event.time}</span>
-                        </div>
+                        {event.time && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 flex-shrink-0 text-primary" />
+                            <span>{event.time}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 

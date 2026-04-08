@@ -1,67 +1,19 @@
 import { useMemo } from "react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Clock, Download } from "lucide-react";
-import { useWordPressEvents } from "@/hooks/use-wordpress";
-import { decodeHtml } from "@/lib/utils";
-import type { WPEvent } from "@/types/wordpress";
+import { Calendar, Clock, Download, MapPin } from "lucide-react";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 import PageSeo from "@/components/seo/PageSeo";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useWordPressEvents } from "@/hooks/use-wordpress";
+import {
+  formatAgendaDate,
+  getAgendaEventYear,
+  getDaysUntilAgendaEvent,
+  mergeAgendaEvents,
+} from "@/lib/agenda";
 import { buildCanonical } from "@/lib/seo";
-
-type AgendaEvent = {
-  id: number;
-  title: string;
-  slug: string;
-  startDate: string;
-  endDate?: string | null;
-  venue?: string | null;
-  city?: string | null;
-  address?: string | null;
-  time?: string | null;
-  klasse?: string | null;
-  result?: string | null;
-  isNextRace?: boolean;
-};
-
-const parseEvent = (event: WPEvent): AgendaEvent => {
-  const meta = event.meta ?? {};
-  const startDate = meta.datum || event.date || event.modified;
-
-  return {
-    id: event.id,
-    title: decodeHtml(event.title.rendered),
-    slug: event.slug,
-    startDate,
-    endDate: meta.einddatum || null,
-    venue: meta.locatie ? decodeHtml(meta.locatie) : null,
-    city: meta.stad ? decodeHtml(meta.stad) : null,
-    address: meta.adres ? decodeHtml(meta.adres) : null,
-    time: meta.tijd || null,
-    klasse: meta.klasse ? decodeHtml(meta.klasse) : null,
-    result: meta.resultaat ? decodeHtml(meta.resultaat) : null,
-    isNextRace: Boolean(meta.volgende_race),
-  };
-};
-
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString("nl-NL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
-
-const getDaysUntil = (dateStr: string) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const eventDate = new Date(dateStr);
-  eventDate.setHours(0, 0, 0, 0);
-  const diffTime = eventDate.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
 
 const Agenda = () => {
   const { data, isLoading, isError } = useWordPressEvents({
@@ -70,20 +22,13 @@ const Agenda = () => {
   });
 
   const events = useMemo(() => {
-    const items = data?.items ?? [];
-    return items
-      .map(parseEvent)
-      .filter((item) => item.startDate)
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    return mergeAgendaEvents(data?.items ?? []).filter((item) => item.startDate);
   }, [data]);
 
   const upcomingEvents = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    return events
-      .filter((event) => new Date(event.startDate) >= now)
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-      .slice(0, 3);
+    return events.filter((event) => new Date(event.startDate) >= now).slice(0, 6);
   }, [events]);
 
   const pastEvents = useMemo(() => {
@@ -92,6 +37,17 @@ const Agenda = () => {
     return events
       .filter((event) => new Date(event.startDate) < now)
       .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+  }, [events]);
+
+  const seriesGroups = useMemo(() => {
+    return events.reduce<Record<string, typeof events>>((acc, event) => {
+      const key = event.series || event.klasse || "Overige races";
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(event);
+      return acc;
+    }, {});
   }, [events]);
 
   const eventsJsonLd = useMemo(() => {
@@ -114,7 +70,7 @@ const Agenda = () => {
               address: event.address || event.city || "",
             }
           : undefined,
-        url: buildCanonical(`/agenda/${new Date(event.startDate).getFullYear()}/${event.slug}`),
+        url: buildCanonical(`/agenda/${getAgendaEventYear(event)}/${event.slug}`),
       };
     });
   }, [events]);
@@ -123,20 +79,17 @@ const Agenda = () => {
     <div className="min-h-screen bg-background">
       <PageSeo
         title="Race Agenda | Levy Opbergen"
-        description="Bekijk alle aankomende en afgelopen races van Levy Opbergen inclusief locaties, tijden en klasses."
+        description="Bekijk alle aankomende en afgelopen races van Levy Opbergen, netjes ingedeeld per kampioenschap."
         path="/agenda"
         jsonLd={eventsJsonLd}
       />
       <Header />
       <main className="pt-32 pb-20">
         <div className="container mx-auto px-4">
-          {/* Header */}
           <div className="mb-12">
-            <h1 className="text-5xl md:text-6xl font-headline font-bold mb-4">
-              Race Agenda
-            </h1>
+            <h1 className="text-5xl md:text-6xl font-headline font-bold mb-4">Race Agenda</h1>
             <p className="text-xl text-muted-foreground mb-6">
-              Alle aankomende races en evenementen
+              Het seizoen 2026 overzichtelijk ingedeeld per kampioenschap en raceweekend.
             </p>
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
@@ -144,22 +97,60 @@ const Agenda = () => {
             </Button>
           </div>
 
-          {/* Upcoming Events */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            {Object.entries(seriesGroups).map(([series, seriesEvents]) => (
+              <Card key={series} className="border-border/60 bg-card/60">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <h2 className="text-2xl font-headline font-bold">{series}</h2>
+                    <span className="text-sm text-muted-foreground">
+                      {seriesEvents.length} weekenden
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {formatAgendaDate(seriesEvents[0]?.startDate)} tot{" "}
+                    {formatAgendaDate(
+                      seriesEvents[seriesEvents.length - 1]?.endDate ||
+                        seriesEvents[seriesEvents.length - 1]?.startDate,
+                    )}
+                  </p>
+                  <div className="space-y-2">
+                    {seriesEvents.map((event) => (
+                      <div
+                        key={event.slug}
+                        className="flex items-center justify-between gap-4 rounded-xl border border-border/50 px-4 py-3"
+                      >
+                        <div>
+                          <div className="font-medium">{event.roundLabel || event.title}</div>
+                          <div className="text-sm text-muted-foreground">{event.venue}</div>
+                        </div>
+                        <div className="text-sm text-muted-foreground text-right">
+                          {formatAgendaDate(event.startDate)}
+                          {event.endDate ? ` - ${formatAgendaDate(event.endDate)}` : ""}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
           <div className="mb-16">
-            <h2 className="text-3xl font-headline font-bold mb-8">
-              Aankomende Races
-            </h2>
+            <h2 className="text-3xl font-headline font-bold mb-8">Aankomende Races</h2>
             {isLoading && <div className="text-muted-foreground">Evenementen worden geladen...</div>}
             {isError && !isLoading && (
-              <div className="text-destructive">Kon evenementen niet laden.</div>
+              <div className="text-destructive">
+                WordPress-events konden niet worden geladen. De agenda toont daarom de ingevoerde seizoenskalender.
+              </div>
             )}
             {!isLoading && upcomingEvents.length === 0 && (
               <div className="text-muted-foreground">Geen aankomende evenementen gevonden.</div>
             )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {upcomingEvents.map((event) => {
-                const daysUntil = getDaysUntil(event.startDate);
-                const year = new Date(event.startDate).getFullYear();
+                const daysUntil = getDaysUntilAgendaEvent(event.startDate);
+                const year = getAgendaEventYear(event);
                 return (
                   <Card
                     key={event.id}
@@ -171,25 +162,28 @@ const Agenda = () => {
                       <CardContent className="p-8 space-y-6">
                         {event.isNextRace && (
                           <div className="inline-flex px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold animate-pulse-glow">
-                            🏁 Volgende Race
+                            Volgende Race
                           </div>
                         )}
 
                         <div>
                           <div className="text-sm font-medium text-primary mb-2">
-                            {event.klasse || ""}
+                            {event.klasse || event.series || ""}
                           </div>
-                          <h3 className="text-2xl font-headline font-bold group-hover:text-primary transition-smooth mb-4">
+                          <h3 className="text-2xl font-headline font-bold group-hover:text-primary transition-smooth mb-2">
                             {event.title}
                           </h3>
+                          {event.roundLabel && (
+                            <div className="text-sm text-muted-foreground mb-4">{event.roundLabel}</div>
+                          )}
 
                           <div className="space-y-3">
                             <div className="flex items-start gap-3">
                               <Calendar className="w-5 h-5 mt-0.5 flex-shrink-0 text-primary" />
                               <div>
                                 <div className="font-semibold text-foreground">
-                                  {formatDate(event.startDate)}
-                                  {event.endDate && ` - ${formatDate(event.endDate)}`}
+                                  {formatAgendaDate(event.startDate)}
+                                  {event.endDate && ` - ${formatAgendaDate(event.endDate)}`}
                                 </div>
                                 {daysUntil > 0 && (
                                   <div className="text-sm text-muted-foreground">
@@ -203,7 +197,7 @@ const Agenda = () => {
                               <div className="flex items-start gap-3">
                                 <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0 text-primary" />
                                 <div>
-                                  <div className="font-semibold">{event.venue || "Onbekend Circuit"}</div>
+                                  <div className="font-semibold">{event.venue || "Onbekend circuit"}</div>
                                   <div className="text-sm text-muted-foreground">
                                     {event.address || event.city || ""}
                                   </div>
@@ -227,48 +221,39 @@ const Agenda = () => {
             </div>
           </div>
 
-          {/* Past Events */}
           <div>
-            <h2 className="text-3xl font-headline font-bold mb-8">
-              Afgelopen Races
-            </h2>
+            <h2 className="text-3xl font-headline font-bold mb-8">Afgelopen Races</h2>
             {!isLoading && pastEvents.length === 0 && (
-              <div className="text-muted-foreground">Geen afgelopen races gevonden.</div>
+              <div className="text-muted-foreground">Nog geen afgelopen races in deze kalender.</div>
             )}
             <div className="space-y-4">
               {pastEvents.map((event) => (
-                <Card
-                  key={event.id}
-                  className="group hover:shadow-soft transition-smooth hover-lift"
-                >
-                  <Link to={`/agenda/${new Date(event.startDate).getFullYear()}/${event.slug}`}>
+                <Card key={event.id} className="group hover:shadow-soft transition-smooth hover-lift">
+                  <Link to={`/agenda/${getAgendaEventYear(event)}/${event.slug}`}>
                     <CardContent className="p-6">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex-1">
                           <div className="text-sm font-medium text-primary mb-1">
-                            {event.klasse || ""}
+                            {event.klasse || event.series || ""}
                           </div>
                           <h3 className="text-xl font-headline font-semibold group-hover:text-primary transition-smooth mb-2">
                             {event.title}
                           </h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          {event.roundLabel && (
+                            <div className="text-sm text-muted-foreground mb-2">{event.roundLabel}</div>
+                          )}
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
-                              {formatDate(event.startDate)}
+                              {formatAgendaDate(event.startDate)}
                             </div>
                             <div className="flex items-center gap-1">
                               <MapPin className="w-4 h-4" />
-                              {event.venue || "Onbekend Circuit"}
+                              {event.venue || event.city || "Locatie volgt"}
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          {event.result && (
-                            <div className="text-2xl font-bold text-primary">
-                              {event.result}
-                            </div>
-                          )}
-                        </div>
+                        {event.result && <div className="text-2xl font-bold text-primary">{event.result}</div>}
                       </div>
                     </CardContent>
                   </Link>

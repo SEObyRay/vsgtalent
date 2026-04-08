@@ -2,8 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Calendar, Users } from "lucide-react";
 import heroImage from "@/assets/hero-racing.jpg";
+import { useWordPressSettings } from "@/hooks/use-wordpress";
 
 const HeroSection = () => {
+  const { data: settings } = useWordPressSettings();
+  const stats = settings?.homepage_stats ?? {
+    active_talents: "1",
+    wins: "0",
+    podiums: "5",
+    partners: "5+",
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -70,19 +79,19 @@ const HeroSection = () => {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8">
             <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-              <div className="text-3xl font-bold text-primary">1</div>
+              <div className="text-3xl font-bold text-primary">{stats.active_talents}</div>
               <div className="text-sm text-muted-foreground">Actieve Talenten</div>
             </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-              <div className="text-3xl font-bold text-primary">12</div>
+              <div className="text-3xl font-bold text-primary">{stats.wins}</div>
               <div className="text-sm text-muted-foreground">Overwinningen</div>
             </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-              <div className="text-3xl font-bold text-primary">28</div>
+              <div className="text-3xl font-bold text-primary">{stats.podiums}</div>
               <div className="text-sm text-muted-foreground">Podiums</div>
             </div>
             <div className="bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
-              <div className="text-3xl font-bold text-primary">5+</div>
+              <div className="text-3xl font-bold text-primary">{stats.partners}</div>
               <div className="text-sm text-muted-foreground">Partners</div>
             </div>
           </div>

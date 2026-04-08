@@ -1,0 +1,22 @@
+VSGTalent Media Gallery Plugin
+Versie 1.8.0
+Laatste update: 6 november 2025
+
+Wijzigingen in deze versie:
+- Verbeterde compatibiliteit met WordPress Gutenberg editor
+- Dubbele implementatie voor maximale compatibiliteit
+- Betere error afhandeling en debugging
+- Duidelijkere instructies voor gebruikers
+- URL reparatie functie voor media galerijen
+
+Installatie-instructies:
+1. Upload deze plugin via WordPress > Plugins > Nieuwe toevoegen > Plugin uploaden
+2. Activeer de plugin
+3. Ga naar een post of maak een nieuwe aan
+4. Klik op het instellingen-icoon (tandwiel) rechts bovenin
+5. Selecteer "Media Galerij" in het dropdown menu
+
+Om bestaande galerijen te repareren:
+1. Ga naar het VSGTalent menu in admin
+2. Klik op "Repareer Media Galerij"
+3. Druk op de reparatieknop

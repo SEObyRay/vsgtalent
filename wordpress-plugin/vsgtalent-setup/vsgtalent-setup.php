@@ -3,7 +3,7 @@
  * Plugin Name: VSGTalent Auto Setup
  * Plugin URI: https://vsgtalent.nl
  * Description: Automatische configuratie voor VSGTalent backend
- * Version: 1.8.4
+ * Version: 1.8.6
  * Author: Ray Gritter
  * Text Domain: vsgtalent-setup
  */
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants
-define('VSGTALENT_VERSION', '1.8.4');
+define('VSGTALENT_VERSION', '1.8.6');
 define('VSGTALENT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('VSGTALENT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -31,6 +31,8 @@ class VSGTalent_Setup {
         add_action('rest_api_init', array($this, 'register_rest_routes'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('add_meta_boxes', array($this, 'add_event_meta_boxes'));
+        add_action('save_post_evenement', array($this, 'save_event_meta_box'));
         add_action('enqueue_block_editor_assets', array($this, 'enqueue_gutenberg_assets'));
         add_action('send_headers', array($this, 'add_cors_headers'));
         add_filter('wp_handle_upload', array($this, 'maybe_convert_image_to_avif'));
@@ -41,6 +43,7 @@ class VSGTalent_Setup {
         add_action('admin_post_vsgtalent_repair_media_gallery', array($this, 'handle_repair_media_gallery'));
         add_action('admin_post_vsgtalent_regenerate_thumbnails', array($this, 'handle_regenerate_thumbnails'));
         add_action('admin_post_vsgtalent_convert_single_to_16_9', array($this, 'handle_convert_single_to_16_9'));
+        add_action('admin_post_vsgtalent_import_agenda_2026', array($this, 'handle_import_agenda_2026'));
         add_action('admin_notices', array($this, 'maybe_show_admin_notice'));
         add_filter('rest_prepare_post', array($this, 'filter_rest_post_response'), 11, 3);
         add_filter('image_size_names_choose', array($this, 'add_racing_image_sizes_to_dropdown'));
@@ -152,6 +155,69 @@ class VSGTalent_Setup {
             'default' => 1,
             'sanitize_callback' => 'rest_sanitize_boolean',
         ));
+
+        add_settings_section(
+            'vsgtalent_homepage_stats_section',
+            'Homepage statistieken',
+            array($this, 'homepage_stats_section_callback'),
+            'vsgtalent-settings'
+        );
+
+        add_settings_field(
+            'vsgtalent_home_active_talents',
+            'Actieve talenten',
+            array($this, 'home_active_talents_callback'),
+            'vsgtalent-settings',
+            'vsgtalent_homepage_stats_section'
+        );
+
+        register_setting('vsgtalent_settings', 'vsgtalent_home_active_talents', array(
+            'type' => 'integer',
+            'default' => 1,
+            'sanitize_callback' => 'absint',
+        ));
+
+        add_settings_field(
+            'vsgtalent_home_wins',
+            'Overwinningen',
+            array($this, 'home_wins_callback'),
+            'vsgtalent-settings',
+            'vsgtalent_homepage_stats_section'
+        );
+
+        register_setting('vsgtalent_settings', 'vsgtalent_home_wins', array(
+            'type' => 'integer',
+            'default' => 0,
+            'sanitize_callback' => 'absint',
+        ));
+
+        add_settings_field(
+            'vsgtalent_home_podiums',
+            'Podiums',
+            array($this, 'home_podiums_callback'),
+            'vsgtalent-settings',
+            'vsgtalent_homepage_stats_section'
+        );
+
+        register_setting('vsgtalent_settings', 'vsgtalent_home_podiums', array(
+            'type' => 'integer',
+            'default' => 5,
+            'sanitize_callback' => 'absint',
+        ));
+
+        add_settings_field(
+            'vsgtalent_home_partners',
+            'Partners',
+            array($this, 'home_partners_callback'),
+            'vsgtalent-settings',
+            'vsgtalent_homepage_stats_section'
+        );
+
+        register_setting('vsgtalent_settings', 'vsgtalent_home_partners', array(
+            'type' => 'string',
+            'default' => '5+',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
     }
     
     /**
@@ -159,6 +225,10 @@ class VSGTalent_Setup {
      */
     public function settings_section_callback() {
         echo '<p>Beheer de instellingen voor afbeeldingsconversie.</p>';
+    }
+
+    public function homepage_stats_section_callback() {
+        echo '<p>Pas hier de statistieken aan die op de homepage worden getoond. De website leest deze waarden centraal uit WordPress.</p>';
     }
     
     /**
@@ -175,6 +245,35 @@ class VSGTalent_Setup {
             Wanneer aangevinkt, worden bestanden met 'logo' in de bestandsnaam niet geconverteerd naar AVIF/WebP/JPEG.
             Dit is aan te raden voor logo's om kwaliteitsverlies te voorkomen.
         </p>
+        <?php
+    }
+
+    public function home_active_talents_callback() {
+        $value = (int) get_option('vsgtalent_home_active_talents', 1);
+        ?>
+        <input type="number" min="0" step="1" name="vsgtalent_home_active_talents" value="<?php echo esc_attr($value); ?>" class="small-text" />
+        <?php
+    }
+
+    public function home_wins_callback() {
+        $value = (int) get_option('vsgtalent_home_wins', 0);
+        ?>
+        <input type="number" min="0" step="1" name="vsgtalent_home_wins" value="<?php echo esc_attr($value); ?>" class="small-text" />
+        <?php
+    }
+
+    public function home_podiums_callback() {
+        $value = (int) get_option('vsgtalent_home_podiums', 5);
+        ?>
+        <input type="number" min="0" step="1" name="vsgtalent_home_podiums" value="<?php echo esc_attr($value); ?>" class="small-text" />
+        <?php
+    }
+
+    public function home_partners_callback() {
+        $value = (string) get_option('vsgtalent_home_partners', '5+');
+        ?>
+        <input type="text" name="vsgtalent_home_partners" value="<?php echo esc_attr($value); ?>" class="regular-text" />
+        <p class="description">Vrij invulbaar, bijvoorbeeld <code>5+</code> of <code>8</code>.</p>
         <?php
     }
 
@@ -631,6 +730,21 @@ class VSGTalent_Setup {
                 $message = __('Geen posts gevonden die reparatie nodig hadden.', 'vsgtalent-setup');
             }
             
+            printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
+            return;
+        }
+
+        if (isset($_GET['vsgtalent_agenda_imported'])) {
+            $created = intval($_GET['vsgtalent_agenda_imported']);
+            $skipped = isset($_GET['vsgtalent_agenda_skipped']) ? intval($_GET['vsgtalent_agenda_skipped']) : 0;
+
+            $class = 'notice notice-success';
+            $message = sprintf(
+                __('Agenda import afgerond: %1$d evenementen aangemaakt, %2$d bestaande evenementen overgeslagen.', 'vsgtalent-setup'),
+                $created,
+                $skipped
+            );
+
             printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
         }
     }
@@ -1477,11 +1591,105 @@ class VSGTalent_Setup {
             $result = register_post_meta('sponsor', $field, $args);
             error_log("VSGTalent: Registered sponsor meta field '$field': " . ($result ? 'success' : 'failed'));
         }
+
+        $event_meta_fields = array(
+            'serie' => array(
+                'type'              => 'string',
+                'description'       => 'Serie of kampioenschap',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'ronde_label' => array(
+                'type'              => 'string',
+                'description'       => 'Ronde label',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'datum' => array(
+                'type'              => 'string',
+                'description'       => 'Startdatum evenement',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'einddatum' => array(
+                'type'              => 'string',
+                'description'       => 'Einddatum evenement',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'tijd' => array(
+                'type'              => 'string',
+                'description'       => 'Tijd evenement',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'locatie' => array(
+                'type'              => 'string',
+                'description'       => 'Locatie of circuit',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'stad' => array(
+                'type'              => 'string',
+                'description'       => 'Stad of land',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'adres' => array(
+                'type'              => 'string',
+                'description'       => 'Adres',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'klasse' => array(
+                'type'              => 'string',
+                'description'       => 'Klasse',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'resultaat' => array(
+                'type'              => 'string',
+                'description'       => 'Resultaat',
+                'single'            => true,
+                'sanitize_callback' => 'sanitize_text_field',
+                'show_in_rest'      => true,
+            ),
+            'volgende_race' => array(
+                'type'              => 'boolean',
+                'description'       => 'Markeer als volgende race',
+                'single'            => true,
+                'sanitize_callback' => array($this, 'sanitize_event_boolean_meta'),
+                'show_in_rest'      => true,
+            ),
+        );
+
+        foreach ($event_meta_fields as $field => $args) {
+            $result = register_post_meta('evenement', $field, $args);
+            error_log("VSGTalent: Registered event meta field '$field': " . ($result ? 'success' : 'failed'));
+        }
     }
     
     public function register_rest_fields() {
-        // Meta fields are now registered via register_post_meta with show_in_rest
-        // No additional REST field registration needed
+        foreach ( [ 'post', 'sponsor', 'evenementen' ] as $post_type ) {
+            register_rest_field( $post_type, 'featured_image_url', [
+                'get_callback' => function ( $post_arr ) {
+                    $thumbnail_id = get_post_thumbnail_id( $post_arr['id'] );
+                    if ( ! $thumbnail_id ) return null;
+                    $src = wp_get_attachment_image_src( $thumbnail_id, 'large' );
+                    return $src ? $src[0] : null;
+                },
+                'schema' => [ 'type' => 'string', 'nullable' => true ],
+            ] );
+        }
     }
 
     public function register_rest_routes() {
@@ -1510,10 +1718,16 @@ class VSGTalent_Setup {
         ) : null;
 
         return array(
-            'title'       => get_bloginfo('name'),
-            'description' => get_bloginfo('description'),
-            'icon'        => $icon_data,
-            'logo'        => $logo_data,
+            'title'          => get_bloginfo('name'),
+            'description'    => get_bloginfo('description'),
+            'icon'           => $icon_data,
+            'logo'           => $logo_data,
+            'homepage_stats' => array(
+                'active_talents' => (string) get_option('vsgtalent_home_active_talents', 1),
+                'wins'           => (string) get_option('vsgtalent_home_wins', 0),
+                'podiums'        => (string) get_option('vsgtalent_home_podiums', 5),
+                'partners'       => (string) get_option('vsgtalent_home_partners', '5+'),
+            ),
         );
     }
 
@@ -1563,6 +1777,550 @@ class VSGTalent_Setup {
         return null;
     }
 
+    public function sanitize_event_boolean_meta($value) {
+        return rest_sanitize_boolean($value);
+    }
+
+    private function get_event_series_options() {
+        return array(
+            'Chrono NK 4T 2026'    => 'Chrono NK 4T 2026',
+            'NXTGP Dutch Open 2026' => 'NXTGP Dutch Open 2026',
+        );
+    }
+
+    private function get_event_class_options() {
+        return array(
+            'Parolin Rocky 200cc' => 'Parolin Rocky 200cc',
+        );
+    }
+
+    private function get_event_round_options() {
+        return array(
+            'Chrono NK 4T 2026' => array(
+                'Ronde 1' => 'Ronde 1',
+                'Ronde 2' => 'Ronde 2',
+                'Ronde 3' => 'Ronde 3',
+                'Ronde 4' => 'Ronde 4',
+                'Ronde 5' => 'Ronde 5',
+                'Ronde 6' => 'Ronde 6',
+            ),
+            'NXTGP Dutch Open 2026' => array(
+                'DO 1' => 'DO 1',
+                'DO 2' => 'DO 2',
+                'DO 3' => 'DO 3',
+                'DO 4' => 'DO 4',
+                'DO 5' => 'DO 5',
+                'DO 6' => 'DO 6',
+                'DO 7' => 'DO 7',
+            ),
+        );
+    }
+
+    public function sanitize_event_series_meta($value) {
+        $value = sanitize_text_field($value);
+        $options = $this->get_event_series_options();
+
+        if (isset($options[$value])) {
+            return $value;
+        }
+
+        return '';
+    }
+
+    public function sanitize_event_class_meta($value) {
+        $value = sanitize_text_field($value);
+        $options = $this->get_event_class_options();
+
+        if (isset($options[$value])) {
+            return $value;
+        }
+
+        return 'Parolin Rocky 200cc';
+    }
+
+    public function sanitize_event_round_meta($value, $series = '') {
+        $value = sanitize_text_field($value);
+        $series = sanitize_text_field($series);
+        $options_by_series = $this->get_event_round_options();
+
+        if ($series && isset($options_by_series[$series][$value])) {
+            return $value;
+        }
+
+        foreach ($options_by_series as $options) {
+            if (isset($options[$value])) {
+                return $value;
+            }
+        }
+
+        return '';
+    }
+
+    public function add_event_meta_boxes() {
+        add_meta_box(
+            'vsgtalent_event_details',
+            'Evenement details',
+            array($this, 'render_event_meta_box'),
+            'evenement',
+            'normal',
+            'high'
+        );
+    }
+
+    public function render_event_meta_box($post) {
+        wp_nonce_field('vsgtalent_save_event_meta', 'vsgtalent_event_meta_nonce');
+
+        $series_options = $this->get_event_series_options();
+        $class_options = $this->get_event_class_options();
+        $round_options = $this->get_event_round_options();
+
+        $fields = array(
+            'serie'         => get_post_meta($post->ID, 'serie', true),
+            'ronde_label'   => get_post_meta($post->ID, 'ronde_label', true),
+            'datum'         => get_post_meta($post->ID, 'datum', true),
+            'einddatum'     => get_post_meta($post->ID, 'einddatum', true),
+            'tijd'          => get_post_meta($post->ID, 'tijd', true),
+            'locatie'       => get_post_meta($post->ID, 'locatie', true),
+            'stad'          => get_post_meta($post->ID, 'stad', true),
+            'adres'         => get_post_meta($post->ID, 'adres', true),
+            'klasse'        => get_post_meta($post->ID, 'klasse', true),
+            'resultaat'     => get_post_meta($post->ID, 'resultaat', true),
+            'volgende_race' => get_post_meta($post->ID, 'volgende_race', true),
+        );
+
+        if (empty($fields['klasse'])) {
+            $fields['klasse'] = 'Parolin Rocky 200cc';
+        }
+        if (empty($fields['serie'])) {
+            $fields['serie'] = '';
+        }
+        ?>
+        <style>
+            .vsgtalent-event-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+            .vsgtalent-event-grid .full-width {
+                grid-column: 1 / -1;
+            }
+            .vsgtalent-event-grid label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+            @media (max-width: 782px) {
+                .vsgtalent-event-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const seriesField = document.getElementById('vsgtalent_serie');
+                const roundField = document.getElementById('vsgtalent_ronde_label');
+
+                if (!seriesField || !roundField) {
+                    return;
+                }
+
+                const updateRoundOptions = () => {
+                    const selectedSeries = seriesField.value;
+                    const groups = roundField.querySelectorAll('optgroup');
+
+                    groups.forEach((group) => {
+                        const matches = group.label === selectedSeries;
+                        group.disabled = !matches;
+                        group.style.display = matches ? '' : 'none';
+                    });
+
+                    if (!selectedSeries) {
+                        groups.forEach((group) => {
+                            group.disabled = false;
+                            group.style.display = '';
+                        });
+                        return;
+                    }
+
+                    const selectedOption = roundField.options[roundField.selectedIndex];
+                    if (selectedOption && selectedOption.parentElement.tagName === 'OPTGROUP' && selectedOption.parentElement.label === selectedSeries) {
+                        return;
+                    }
+
+                    roundField.value = '';
+                };
+
+                seriesField.addEventListener('change', updateRoundOptions);
+                updateRoundOptions();
+            });
+        </script>
+        <div class="vsgtalent-event-grid">
+            <div>
+                <label for="vsgtalent_serie">Serie / kampioenschap</label>
+                <select id="vsgtalent_serie" name="vsgtalent_event_meta[serie]" class="regular-text">
+                    <option value="">Selecteer organisatie</option>
+                    <?php foreach ($series_options as $value => $label) : ?>
+                        <option value="<?php echo esc_attr($value); ?>" <?php selected($fields['serie'], $value); ?>>
+                            <?php echo esc_html($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label for="vsgtalent_ronde_label">Ronde label</label>
+                <select id="vsgtalent_ronde_label" name="vsgtalent_event_meta[ronde_label]" class="regular-text">
+                    <option value="">Selecteer ronde</option>
+                    <?php foreach ($round_options as $series_label => $options) : ?>
+                        <optgroup label="<?php echo esc_attr($series_label); ?>">
+                            <?php foreach ($options as $value => $label) : ?>
+                                <option value="<?php echo esc_attr($value); ?>" <?php selected($fields['ronde_label'], $value); ?>>
+                                    <?php echo esc_html($label); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </optgroup>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label for="vsgtalent_datum">Startdatum</label>
+                <input type="date" id="vsgtalent_datum" name="vsgtalent_event_meta[datum]" value="<?php echo esc_attr($fields['datum']); ?>" />
+            </div>
+            <div>
+                <label for="vsgtalent_einddatum">Einddatum</label>
+                <input type="date" id="vsgtalent_einddatum" name="vsgtalent_event_meta[einddatum]" value="<?php echo esc_attr($fields['einddatum']); ?>" />
+            </div>
+            <div>
+                <label for="vsgtalent_tijd">Tijd</label>
+                <input type="text" id="vsgtalent_tijd" name="vsgtalent_event_meta[tijd]" value="<?php echo esc_attr($fields['tijd']); ?>" class="regular-text" placeholder="Bijv. 09:00 - 17:00" />
+            </div>
+            <div>
+                <label for="vsgtalent_klasse">Klasse</label>
+                <select id="vsgtalent_klasse" name="vsgtalent_event_meta[klasse]" class="regular-text">
+                    <?php foreach ($class_options as $value => $label) : ?>
+                        <option value="<?php echo esc_attr($value); ?>" <?php selected($fields['klasse'], $value); ?>>
+                            <?php echo esc_html($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label for="vsgtalent_locatie">Circuit / locatie</label>
+                <input type="text" id="vsgtalent_locatie" name="vsgtalent_event_meta[locatie]" value="<?php echo esc_attr($fields['locatie']); ?>" class="regular-text" />
+            </div>
+            <div>
+                <label for="vsgtalent_stad">Stad / land</label>
+                <input type="text" id="vsgtalent_stad" name="vsgtalent_event_meta[stad]" value="<?php echo esc_attr($fields['stad']); ?>" class="regular-text" />
+            </div>
+            <div class="full-width">
+                <label for="vsgtalent_adres">Adres</label>
+                <input type="text" id="vsgtalent_adres" name="vsgtalent_event_meta[adres]" value="<?php echo esc_attr($fields['adres']); ?>" class="widefat" />
+            </div>
+            <div>
+                <label for="vsgtalent_resultaat">Resultaat</label>
+                <input type="text" id="vsgtalent_resultaat" name="vsgtalent_event_meta[resultaat]" value="<?php echo esc_attr($fields['resultaat']); ?>" class="regular-text" placeholder="Bijv. P3 of DNS" />
+            </div>
+            <div>
+                <label for="vsgtalent_volgende_race">
+                    <input type="checkbox" id="vsgtalent_volgende_race" name="vsgtalent_event_meta[volgende_race]" value="1" <?php checked(!empty($fields['volgende_race'])); ?> />
+                    Markeer als volgende race
+                </label>
+            </div>
+        </div>
+        <p class="description" style="margin-top:16px;">
+            Deze velden worden gebruikt op de agenda-pagina, homepage agenda-widget en evenement detailpagina.
+        </p>
+        <p class="description">
+            De organisatie en klasse zijn bewust beperkt, zodat alles op de site consequent hetzelfde wordt weergegeven.
+        </p>
+        <?php
+    }
+
+    private function get_default_agenda_2026_events() {
+        return array(
+            array(
+                'post_title'   => 'Chrono NK 4T',
+                'post_name'    => 'nk4t-ronde-1-2026',
+                'post_excerpt' => 'Openingsweekend van Chrono NK 4T 2026 in de klasse Parolin Rocky 200cc.',
+                'post_content' => '<p>Raceweekend van Chrono NK 4T. Levy rijdt hier in de klasse Parolin Rocky 200cc op Circuit de Landsard.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'Chrono NK 4T 2026',
+                    'ronde_label' => 'Ronde 1',
+                    'datum'       => '2026-03-14',
+                    'einddatum'   => '2026-03-15',
+                    'locatie'     => 'Circuit de Landsard',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-1-2026',
+                'post_excerpt' => 'Eerste ronde van NXTGP Dutch Open 2026 in de klasse Parolin Rocky 200cc.',
+                'post_content' => '<p>Openingsweekend van NXTGP Dutch Open 2026 op Kartcircuit Pottendijk Linksom in de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 1',
+                    'datum'       => '2026-03-28',
+                    'einddatum'   => '2026-03-29',
+                    'locatie'     => 'Kartcircuit Pottendijk Linksom',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'Chrono NK 4T',
+                'post_name'    => 'nk4t-ronde-2-2026',
+                'post_excerpt' => 'Tweede raceweekend van Chrono NK 4T in Parolin Rocky 200cc.',
+                'post_content' => '<p>Chrono NK 4T Ronde 2 wordt verreden op Circuit Park Berghem in de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'Chrono NK 4T 2026',
+                    'ronde_label' => 'Ronde 2',
+                    'datum'       => '2026-04-04',
+                    'einddatum'   => '2026-04-05',
+                    'locatie'     => 'Circuit Park Berghem',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-2-2026',
+                'post_excerpt' => 'Tweede weekend van NXTGP Dutch Open in de klasse Parolin Rocky 200cc.',
+                'post_content' => '<p>NXTGP Dutch Open reist voor ronde 2 af naar Erftlandring Kerpen in Duitsland. Klasse: Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 2',
+                    'datum'       => '2026-04-11',
+                    'einddatum'   => '2026-04-12',
+                    'locatie'     => 'Erftlandring Kerpen',
+                    'stad'        => 'Kerpen, Duitsland',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'Chrono NK 4T',
+                'post_name'    => 'nk4t-ronde-3-2026',
+                'post_excerpt' => 'Derde Chrono NK 4T-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Chrono NK 4T Ronde 3 staat gepland op Kartbaan Strijen voor de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'Chrono NK 4T 2026',
+                    'ronde_label' => 'Ronde 3',
+                    'datum'       => '2026-05-09',
+                    'einddatum'   => '2026-05-10',
+                    'locatie'     => 'Kartbaan Strijen',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-3-2026',
+                'post_excerpt' => 'Derde NXTGP Dutch Open-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Ronde 3 van NXTGP Dutch Open wordt verreden op het TT Circuit Assen Special in de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 3',
+                    'datum'       => '2026-06-06',
+                    'einddatum'   => '2026-06-07',
+                    'locatie'     => 'TT Circuit Assen Special',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-4-2026',
+                'post_excerpt' => 'Vierde NXTGP Dutch Open-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Ronde 4 van NXTGP Dutch Open staat op de kalender in Strijen voor de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 4',
+                    'datum'       => '2026-06-20',
+                    'einddatum'   => '2026-06-21',
+                    'locatie'     => 'SHW Strijen',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'Chrono NK 4T',
+                'post_name'    => 'nk4t-ronde-4-2026',
+                'post_excerpt' => 'Vierde Chrono NK 4T-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Deze Chrono NK 4T-ronde wordt verreden op Circuit Erftlandring Kerpen in Duitsland voor de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'Chrono NK 4T 2026',
+                    'ronde_label' => 'Ronde 4',
+                    'datum'       => '2026-06-27',
+                    'einddatum'   => '2026-06-28',
+                    'locatie'     => 'Circuit Erftlandring Kerpen',
+                    'stad'        => 'Kerpen, Duitsland',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-5-2026',
+                'post_excerpt' => 'Vijfde NXTGP Dutch Open-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Na de zomerstop gaat NXTGP Dutch Open verder met ronde 5 in Kerpen voor de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 5',
+                    'datum'       => '2026-09-19',
+                    'einddatum'   => '2026-09-20',
+                    'locatie'     => 'Erftlandring Kerpen',
+                    'stad'        => 'Kerpen, Duitsland',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'Chrono NK 4T',
+                'post_name'    => 'nk4t-ronde-5-2026',
+                'post_excerpt' => 'Voorlaatste Chrono NK 4T-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Chrono NK 4T Ronde 5 staat gepland op Circuit Spa Francorchamps voor de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'Chrono NK 4T 2026',
+                    'ronde_label' => 'Ronde 5',
+                    'datum'       => '2026-10-10',
+                    'einddatum'   => '2026-10-11',
+                    'locatie'     => 'Circuit Spa Francorchamps',
+                    'stad'        => 'Spa-Francorchamps, België',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-6-2026',
+                'post_excerpt' => 'Zesde NXTGP Dutch Open-weekend in Parolin Rocky 200cc.',
+                'post_content' => '<p>Ronde 6 van NXTGP Dutch Open vindt plaats op Kartcircuit Pottendijk Rechtsom in de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 6',
+                    'datum'       => '2026-10-17',
+                    'einddatum'   => '2026-10-18',
+                    'locatie'     => 'Kartcircuit Pottendijk Rechtsom',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'NXTGP Dutch Open',
+                'post_name'    => 'dutch-open-ronde-7-2026',
+                'post_excerpt' => 'Finaleweekend van NXTGP Dutch Open 2026 in Parolin Rocky 200cc.',
+                'post_content' => '<p>NXTGP Dutch Open 2026 wordt afgesloten met ronde 7 op TT Circuit Assen voor de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'       => 'NXTGP Dutch Open 2026',
+                    'ronde_label' => 'DO 7',
+                    'datum'       => '2026-10-31',
+                    'einddatum'   => '2026-11-01',
+                    'locatie'     => 'TT Circuit Assen',
+                    'klasse'      => 'Parolin Rocky 200cc',
+                ),
+            ),
+            array(
+                'post_title'   => 'Chrono NK 4T',
+                'post_name'    => 'nk4t-ronde-6-2026',
+                'post_excerpt' => 'Seizoensafsluiter van Chrono NK 4T 2026 in Parolin Rocky 200cc.',
+                'post_content' => '<p>De finale van Chrono NK 4T 2026 wordt verreden op Circuit de Landsard in de klasse Parolin Rocky 200cc.</p>',
+                'meta_input'   => array(
+                    'serie'         => 'Chrono NK 4T 2026',
+                    'ronde_label'   => 'Ronde 6',
+                    'datum'         => '2026-11-14',
+                    'einddatum'     => '2026-11-15',
+                    'locatie'       => 'Circuit de Landsard',
+                    'klasse'        => 'Parolin Rocky 200cc',
+                    'volgende_race' => 1,
+                ),
+            ),
+        );
+    }
+
+    public function save_event_meta_box($post_id) {
+        if (!isset($_POST['vsgtalent_event_meta_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['vsgtalent_event_meta_nonce'])), 'vsgtalent_save_event_meta')) {
+            return;
+        }
+
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
+        $submitted = isset($_POST['vsgtalent_event_meta']) && is_array($_POST['vsgtalent_event_meta'])
+            ? wp_unslash($_POST['vsgtalent_event_meta'])
+            : array();
+
+        $sanitized_series = isset($submitted['serie'])
+            ? $this->sanitize_event_series_meta($submitted['serie'])
+            : '';
+
+        $schema = array(
+            'serie'         => $sanitized_series,
+            'ronde_label'   => isset($submitted['ronde_label']) ? $this->sanitize_event_round_meta($submitted['ronde_label'], $sanitized_series) : '',
+            'datum'         => isset($submitted['datum']) ? sanitize_text_field($submitted['datum']) : '',
+            'einddatum'     => isset($submitted['einddatum']) ? sanitize_text_field($submitted['einddatum']) : '',
+            'tijd'          => isset($submitted['tijd']) ? sanitize_text_field($submitted['tijd']) : '',
+            'locatie'       => isset($submitted['locatie']) ? sanitize_text_field($submitted['locatie']) : '',
+            'stad'          => isset($submitted['stad']) ? sanitize_text_field($submitted['stad']) : '',
+            'adres'         => isset($submitted['adres']) ? sanitize_text_field($submitted['adres']) : '',
+            'klasse'        => isset($submitted['klasse']) ? $this->sanitize_event_class_meta($submitted['klasse']) : 'Parolin Rocky 200cc',
+            'resultaat'     => isset($submitted['resultaat']) ? sanitize_text_field($submitted['resultaat']) : '',
+            'volgende_race' => !empty($submitted['volgende_race']) ? 1 : 0,
+        );
+
+        foreach ($schema as $key => $value) {
+            if ('volgende_race' === $key) {
+                update_post_meta($post_id, $key, $value);
+                continue;
+            }
+
+            if ($value === '' || $value === null) {
+                delete_post_meta($post_id, $key);
+                continue;
+            }
+
+            update_post_meta($post_id, $key, $value);
+        }
+    }
+
+    public function handle_import_agenda_2026() {
+        if (!current_user_can('manage_options') || !check_admin_referer('vsgtalent_import_agenda_2026_nonce')) {
+            wp_die(__('Je hebt geen toestemming om deze agenda te importeren.', 'vsgtalent-setup'));
+        }
+
+        $created = 0;
+        $skipped = 0;
+
+        foreach ($this->get_default_agenda_2026_events() as $event) {
+            $existing = get_page_by_path($event['post_name'], OBJECT, 'evenement');
+
+            if ($existing) {
+                $skipped++;
+                continue;
+            }
+
+            $postarr = array(
+                'post_type'    => 'evenement',
+                'post_status'  => 'publish',
+                'post_title'   => $event['post_title'],
+                'post_name'    => $event['post_name'],
+                'post_excerpt' => $event['post_excerpt'],
+                'post_content' => $event['post_content'],
+                'meta_input'   => $event['meta_input'],
+            );
+
+            $result = wp_insert_post($postarr, true);
+
+            if (!is_wp_error($result)) {
+                $created++;
+            }
+        }
+
+        wp_safe_redirect(add_query_arg(
+            array(
+                'page'                       => 'vsgtalent-import-agenda-2026',
+                'vsgtalent_agenda_imported'  => $created,
+                'vsgtalent_agenda_skipped'   => $skipped,
+            ),
+            admin_url('admin.php')
+        ));
+        exit;
+    }
+
     public function add_admin_menu() {
         add_menu_page(
             'VSGTalent Setup',
@@ -1603,6 +2361,15 @@ class VSGTalent_Setup {
             'vsgtalent-convert-originals',
             array($this, 'convert_originals_page')
         );
+
+        add_submenu_page(
+            'vsgtalent-setup',
+            'Importeer Agenda 2026',
+            'Importeer Agenda 2026',
+            'manage_options',
+            'vsgtalent-import-agenda-2026',
+            array($this, 'import_agenda_2026_page')
+        );
     }
     
     public function admin_page() {
@@ -1617,6 +2384,50 @@ class VSGTalent_Setup {
                 submit_button('Instellingen opslaan');
                 ?>
             </form>
+        </div>
+        <?php
+    }
+
+    public function import_agenda_2026_page() {
+        $events = $this->get_default_agenda_2026_events();
+        ?>
+        <div class="wrap">
+            <h1>Importeer Agenda 2026</h1>
+            <p>Maak met een klik de standaard NK4T 2026 en Dutch Open 2026 evenementen aan als echte WordPress-items.</p>
+            <p>De import is veilig opnieuw uit te voeren: bestaande evenementen met dezelfde slug worden overgeslagen.</p>
+
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="vsgtalent_import_agenda_2026" />
+                <?php wp_nonce_field('vsgtalent_import_agenda_2026_nonce'); ?>
+                <?php submit_button('Importeer NK4T + Dutch Open 2026'); ?>
+            </form>
+
+            <h2 style="margin-top: 32px;">Te importeren evenementen</h2>
+            <table class="widefat striped">
+                <thead>
+                    <tr>
+                        <th>Titel</th>
+                        <th>Serie</th>
+                        <th>Periode</th>
+                        <th>Locatie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($events as $event) : ?>
+                        <tr>
+                            <td><?php echo esc_html($event['title']); ?></td>
+                            <td><?php echo esc_html($event['meta_input']['serie']); ?></td>
+                            <td>
+                                <?php echo esc_html($event['meta_input']['datum']); ?>
+                                <?php if (!empty($event['meta_input']['einddatum'])) : ?>
+                                    - <?php echo esc_html($event['meta_input']['einddatum']); ?>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo esc_html($event['meta_input']['locatie']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
         <?php
     }

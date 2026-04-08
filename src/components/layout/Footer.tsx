@@ -4,7 +4,7 @@ import { useWordPressSettings } from "@/hooks/use-wordpress";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const buildTimestamp = new Date().toLocaleString("nl-NL", {
+  const buildTimestamp = new Date(__BUILD_TIMESTAMP__).toLocaleString("nl-NL", {
     dateStyle: "short",
     timeStyle: "short",
     timeZone: "Europe/Amsterdam",

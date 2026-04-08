@@ -47,6 +47,8 @@ export interface WPEventMeta {
   stad?: string | null;
   adres?: string | null;
   klasse?: string | null;
+  serie?: string | null;
+  ronde_label?: string | null;
   volgende_race?: boolean | null;
   resultaat?: string | null;
   [key: string]: unknown;
@@ -94,11 +96,19 @@ export interface WPSettingsImage {
   height: number | null;
 }
 
+export interface WPHomepageStats {
+  active_talents: string;
+  wins: string;
+  podiums: string;
+  partners: string;
+}
+
 export interface WPSettings {
   title: string;
   description: string;
   icon: WPSettingsImage | null;
   logo: WPSettingsImage | null;
+  homepage_stats: WPHomepageStats;
 }
 
 export interface WPRestFetchOptions {
