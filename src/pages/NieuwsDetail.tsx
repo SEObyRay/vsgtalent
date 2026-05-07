@@ -37,6 +37,25 @@ const extractFeaturedImage = (post: WPPost | null) => {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
 
+const getUploadPath = (source?: string | null) => {
+  if (!source) return "";
+
+  try {
+    const url = new URL(source);
+    return url.pathname;
+  } catch {
+    const uploadsIndex = source.indexOf("/wp-content/uploads/");
+    return uploadsIndex >= 0 ? source.slice(uploadsIndex) : source;
+  }
+};
+
+const filterFeaturedFromGallery = (gallery?: (string | null | undefined)[] | null, featured?: string | null) => {
+  const featuredPath = getUploadPath(featured);
+  if (!featuredPath) return gallery ?? [];
+
+  return (gallery ?? []).filter((item) => getUploadPath(item) !== featuredPath);
+};
+
 const formatDate = (date?: string) => {
   if (!date) return "Onbekende datum";
   return new Date(date).toLocaleDateString("nl-NL", {
@@ -59,6 +78,10 @@ const NieuwsDetail = () => {
   const { data: post, isLoading, isError } = useWordPressPostBySlug(slug ?? "");
 
   const featuredImage = useMemo(() => extractFeaturedImage(post), [post]);
+  const galleryImages = useMemo(
+    () => filterFeaturedFromGallery(post?.meta?.media_gallery, featuredImage),
+    [post?.meta?.media_gallery, featuredImage],
+  );
   const { competition, season } = useMemo(() => extractTerms(post), [post]);
 
   const circuit = getPostCircuitLabel(post);
@@ -167,7 +190,7 @@ const NieuwsDetail = () => {
               )}
 
               <MediaGallery
-                images={post.meta?.media_gallery ?? []}
+                images={galleryImages}
                 videos={post.meta?.media_videos ?? []}
                 title="Race media"
               />
