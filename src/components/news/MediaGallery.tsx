@@ -8,7 +8,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const VIDEO_FILE_EXTENSIONS = ["mp4", "webm", "ogg", "ogv", "mov", "m4v"] as const;
 const WP_UPLOAD_PATH = "/wp-content/uploads/";
@@ -137,6 +137,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [failedSources, setFailedSources] = useState<Set<string>>(() => new Set());
+  const videoRefs = useRef(new Map<string, HTMLVideoElement>());
 
   const handleMediaError = (src: string) => {
     setFailedSources((prev) => {
@@ -147,6 +148,15 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   };
 
   const visibleItems = items.filter((item) => !failedSources.has(item.source));
+  const activeVideoSource = visibleItems[current]?.type === "video" ? visibleItems[current].source : null;
+
+  const setVideoRef = (source: string, node: HTMLVideoElement | null) => {
+    if (node) {
+      videoRefs.current.set(source, node);
+    } else {
+      videoRefs.current.delete(source);
+    }
+  };
 
   useEffect(() => {
     if (!api) return;
@@ -157,6 +167,19 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
       setCurrent(api.selectedScrollSnap());
     });
   }, [api]);
+
+  useEffect(() => {
+    videoRefs.current.forEach((video, source) => {
+      if (source === activeVideoSource) {
+        video.muted = true;
+        video.play().catch(() => {
+          // Some browsers still block autoplay until the user interacts.
+        });
+      } else {
+        video.pause();
+      }
+    });
+  }, [activeVideoSource]);
 
   if (visibleItems.length === 0) {
     return null;
@@ -188,7 +211,12 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                     onError={() => handleMediaError(item.source)}
                   />
                 ) : (
-                  <VideoSlide source={item.source} title={`${heading} video ${index + 1}`} onError={handleMediaError} />
+                  <VideoSlide
+                    source={item.source}
+                    title={`${heading} video ${index + 1}`}
+                    onError={handleMediaError}
+                    setVideoRef={setVideoRef}
+                  />
                 )}
                 <span
                   className={cn(
@@ -261,13 +289,26 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
   );
 };
 
-const VideoSlide = ({ source, title, onError }: { source: string; title: string; onError?: (src: string) => void }) => {
+const VideoSlide = ({
+  source,
+  title,
+  onError,
+  setVideoRef,
+}: {
+  source: string;
+  title: string;
+  onError?: (src: string) => void;
+  setVideoRef?: (source: string, node: HTMLVideoElement | null) => void;
+}) => {
   const renderer = getVideoRenderer(source);
 
   if (renderer.type === "video") {
     return (
       <video
+        ref={(node) => setVideoRef?.(source, node)}
         controls
+        muted
+        playsInline
         preload="metadata"
         className="absolute inset-0 h-full w-full object-cover"
         poster={undefined}

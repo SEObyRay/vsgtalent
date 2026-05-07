@@ -3,7 +3,7 @@
  * Plugin Name: VSGTalent Auto Setup
  * Plugin URI: https://vsgtalent.nl
  * Description: Automatische configuratie voor VSGTalent backend
- * Version: 1.8.6
+ * Version: 1.8.7
  * Author: Ray Gritter
  * Text Domain: vsgtalent-setup
  */
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constants
-define('VSGTALENT_VERSION', '1.8.6');
+define('VSGTALENT_VERSION', '1.8.7');
 define('VSGTALENT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('VSGTALENT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -1680,7 +1680,7 @@ class VSGTalent_Setup {
     }
     
     public function register_rest_fields() {
-        foreach ( [ 'post', 'sponsor', 'evenementen' ] as $post_type ) {
+        foreach ( [ 'post', 'sponsor', 'evenement' ] as $post_type ) {
             register_rest_field( $post_type, 'featured_image_url', [
                 'get_callback' => function ( $post_arr ) {
                     $thumbnail_id = get_post_thumbnail_id( $post_arr['id'] );
