@@ -193,6 +193,7 @@ const NieuwsDetail = () => {
                 images={galleryImages}
                 videos={post.meta?.media_videos ?? []}
                 title="Race media"
+                videoPoster={featuredImage}
               />
 
               <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content.rendered }} />

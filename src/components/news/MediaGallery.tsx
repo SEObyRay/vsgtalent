@@ -61,6 +61,7 @@ type MediaGalleryProps = {
   images?: (string | null | undefined)[] | null;
   videos?: (string | null | undefined)[] | null;
   title?: string;
+  videoPoster?: string | null;
 };
 
 type GalleryItem = {
@@ -132,8 +133,9 @@ const buildGalleryItems = (images?: MediaGalleryProps["images"], videos?: MediaG
   return [...imageItems, ...videoItems];
 };
 
-export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
+export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGalleryProps) => {
   const items = buildGalleryItems(images, videos);
+  const normalizedVideoPoster = videoPoster ? normalizeMediaSource(videoPoster) : null;
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [failedSources, setFailedSources] = useState<Set<string>>(() => new Set());
@@ -214,6 +216,7 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                   <VideoSlide
                     source={item.source}
                     title={`${heading} video ${index + 1}`}
+                    poster={normalizedVideoPoster}
                     onError={handleMediaError}
                     setVideoRef={setVideoRef}
                   />
@@ -259,9 +262,17 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
                   onError={() => handleMediaError(item.source)}
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted">
+                <div className="relative flex h-full w-full items-center justify-center bg-muted">
+                  {normalizedVideoPoster && (
+                    <img
+                      src={normalizedVideoPoster}
+                      alt={`Video thumbnail ${index + 1}`}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  )}
+                  <span className="absolute inset-0 bg-background/20" />
                   <svg
-                    className="h-6 w-6 text-muted-foreground"
+                    className="relative h-6 w-6 text-foreground drop-shadow"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -292,11 +303,13 @@ export const MediaGallery = ({ images, videos, title }: MediaGalleryProps) => {
 const VideoSlide = ({
   source,
   title,
+  poster,
   onError,
   setVideoRef,
 }: {
   source: string;
   title: string;
+  poster?: string | null;
   onError?: (src: string) => void;
   setVideoRef?: (source: string, node: HTMLVideoElement | null) => void;
 }) => {
@@ -311,7 +324,7 @@ const VideoSlide = ({
         playsInline
         preload="metadata"
         className="absolute inset-0 h-full w-full object-cover"
-        poster={undefined}
+        poster={poster ?? undefined}
         onError={() => onError?.(source)}
       >
         <source src={renderer.src} />
