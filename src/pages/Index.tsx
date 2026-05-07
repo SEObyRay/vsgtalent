@@ -42,8 +42,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Levy Opbergen | Kart Racing Talent"
-        description="Volg Levy Opbergen's race avonturen, bekijk wedstrijdverslagen en ontdek hoe je sponsor wordt van dit kart talent."
+        title="VSG Talent | Levy Opbergen Kart Racing Talent"
+        description="VSG Talent ondersteunt karttalent Levy Opbergen. Volg zijn raceverslagen, 2026 agenda, media en sponsormogelijkheden."
         path="/"
         jsonLd={[ldJson, organizationLdJson]}
       />

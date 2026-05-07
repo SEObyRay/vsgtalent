@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://levyopbergen.nl/sitemap.xml
+Sitemap: https://vsgtalent.nl/sitemap.xml

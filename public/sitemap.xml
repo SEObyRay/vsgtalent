@@ -1,35 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://levyopbergen.nl/</loc>
+    <loc>https://vsgtalent.nl/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://levyopbergen.nl/nieuws</loc>
+    <loc>https://vsgtalent.nl/nieuws</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/sponsors</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://levyopbergen.nl/agenda</loc>
+    <loc>https://vsgtalent.nl/over-levy</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://levyopbergen.nl/sponsors</loc>
-    <priority>0.6</priority>
+    <loc>https://vsgtalent.nl/club-van-100</loc>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://levyopbergen.nl/over-levy</loc>
+    <loc>https://vsgtalent.nl/media</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://levyopbergen.nl/club-van-100</loc>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://levyopbergen.nl/media</loc>
+    <loc>https://vsgtalent.nl/contact</loc>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://levyopbergen.nl/contact</loc>
-    <priority>0.5</priority>
+    <loc>https://vsgtalent.nl/privacy</loc>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/algemene-voorwaarden</loc>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-klaar-voor-nk4t-ronde-3-strijen</loc>
+    <lastmod>2026-05-07</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-drie-bekers-berghem</loc>
+    <lastmod>2026-04-16</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-scherp-tijdens-trainingsmaand</loc>
+    <lastmod>2026-04-30</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-uitdagend-weekend-kerpen-motorpech-inhaalrace</loc>
+    <lastmod>2026-04-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-podiumplaats-berghem</loc>
+    <lastmod>2026-04-08</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-nxt-gp-dutch-open-karting-emmen</loc>
+    <lastmod>2026-04-01</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-nxt-gp-dutch-open-emmen-2026</loc>
+    <lastmod>2026-03-23</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-vernieuwd-circuit-emmen</loc>
+    <lastmod>2026-03-19</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-debuut-nk-karting-landsard</loc>
+    <lastmod>2026-03-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-klaar-voor-debuut-nk4t-2026</loc>
+    <lastmod>2026-03-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-schittert-podiumplaats-strijen</loc>
+    <lastmod>2026-03-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/nieuw-kartdesign-levy-opbergen-voor-nxt-dutch-open-en-nk-4t-2026</loc>
+    <lastmod>2026-02-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2026/levy-opbergen-zet-volgende-stap-in-2025-chrono-nk-4t-en-nxt-gp-dutch-open</loc>
+    <lastmod>2026-02-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2025/vsgtalent-bouwt-verder-aan-jeugd-karting-talent</loc>
+    <lastmod>2026-03-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/nieuws/2025/glorieuze-overwinning-iame-x30-challenge</loc>
+    <lastmod>2026-03-13</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/sponsors/van-der-spoel-kart-service</loc>
+    <lastmod>2025-11-25</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/sponsors/id-engines</loc>
+    <lastmod>2025-11-25</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/sponsors/vsg-dakwerken</loc>
+    <lastmod>2025-11-25</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/nk4t-ronde-1-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-1-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/nk4t-ronde-2-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-2-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/nk4t-ronde-3-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-3-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-4-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/nk4t-ronde-4-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-5-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/nk4t-ronde-5-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-6-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/dutch-open-ronde-7-2026</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://vsgtalent.nl/agenda/2026/nk4t-ronde-6-2026</loc>
+    <priority>0.7</priority>
   </url>
 </urlset>

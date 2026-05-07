@@ -16,6 +16,8 @@ const OverLevy = lazy(() => import("./pages/OverLevy"));
 const ClubVan100 = lazy(() => import("./pages/ClubVan100"));
 const Media = lazy(() => import("./pages/Media"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const AlgemeneVoorwaarden = lazy(() => import("./pages/AlgemeneVoorwaarden"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/club-van-100" element={<ClubVan100 />} />
             <Route path="/media" element={<Media />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/algemene-voorwaarden" element={<AlgemeneVoorwaarden />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import PageSeo from "@/components/seo/PageSeo";
 import { useWordPressSponsorBySlug } from "@/hooks/use-wordpress";
 import type { WPSponsor } from "@/types/wordpress";
+import { SITE_URL } from "@/lib/seo";
 
 const pickLogo = (s: WPSponsor): string | null => {
   if (s.featured_image_url) return s.featured_image_url;
@@ -52,13 +53,28 @@ const SponsorDetail = () => {
   const name = sponsor.title?.rendered || "Sponsor";
   const website = sponsor.meta?.website ?? null;
   const initials = name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  const plainExcerpt = sponsor.excerpt?.rendered?.replace(/<[^>]+>/g, "").trim();
+  const hasContent = Boolean(sponsor.content?.rendered?.replace(/<[^>]+>/g, "").trim());
+  const sponsorJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name,
+    url: website || `${SITE_URL}/sponsors/${slug}`,
+    logo: logo || undefined,
+    sponsor: {
+      "@type": "Person",
+      name: "Levy Opbergen",
+    },
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
         title={`${name} | Partners VSGTalent`}
-        description={sponsor.excerpt?.rendered?.replace(/<[^>]+>/g, "").slice(0, 155) || `${name} is een partner van Levy Opbergen.`}
+        description={plainExcerpt?.slice(0, 155) || `${name} ondersteunt karttalent Levy Opbergen als partner van VSG Talent.`}
         path={`/sponsors/${slug}`}
+        image={logo ?? undefined}
+        jsonLd={sponsorJsonLd}
       />
       <Header />
       <main className="pt-32 pb-20">
@@ -90,10 +106,26 @@ const SponsorDetail = () => {
             </div>
           </div>
 
-          <article
-            className="prose prose-invert max-w-none text-base md:text-lg leading-relaxed [&_h2]:text-2xl [&_h2]:font-headline [&_h2]:font-bold [&_strong]:font-semibold [&_a]:text-primary [&_a]:underline [&_ul]:list-disc [&_ul]:pl-6 [&_li]:pl-1"
-            dangerouslySetInnerHTML={{ __html: sponsor.content?.rendered ?? "" }}
-          />
+          {hasContent ? (
+            <article
+              className="prose prose-invert max-w-none text-base md:text-lg leading-relaxed [&_h2]:text-2xl [&_h2]:font-headline [&_h2]:font-bold [&_strong]:font-semibold [&_a]:text-primary [&_a]:underline [&_ul]:list-disc [&_ul]:pl-6 [&_li]:pl-1"
+              dangerouslySetInnerHTML={{ __html: sponsor.content?.rendered ?? "" }}
+            />
+          ) : (
+            <article className="prose prose-invert max-w-none text-base md:text-lg leading-relaxed">
+              <h2>{name} ondersteunt Levy Opbergen</h2>
+              <p>
+                {name} is onderdeel van het partnernetwerk rond VSG Talent en helpt Levy Opbergen om zich
+                verder te ontwikkelen binnen de kartsport. Dankzij betrokken partners kan Levy blijven investeren
+                in training, materiaal, raceweekenden en professionele begeleiding.
+              </p>
+              <h2>Waarom partnerships belangrijk zijn</h2>
+              <p>
+                Karting vraagt om consistentie, voorbereiding en betrouwbaar materiaal. Partners maken het mogelijk
+                om wedstrijdervaring op te bouwen en stap voor stap richting hogere doelen te werken.
+              </p>
+            </article>
+          )}
         </div>
       </main>
       <Footer />

@@ -37,6 +37,8 @@ const extractFeaturedImage = (post: WPPost | null) => {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
 
+const getStringMeta = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+
 const getUploadPath = (source?: string | null) => {
   if (!source) return "";
 
@@ -91,7 +93,11 @@ const NieuwsDetail = () => {
   const title = post
     ? `${decodeHtml(post.title.rendered)} | Wedstrijdverslag Levy Opbergen`
     : "Wedstrijdverslag | Levy Opbergen";
-  const rawSummary = post?.meta?.samenvatting ?? post?.excerpt?.rendered ?? "";
+  const rawSummary =
+    getStringMeta(post?.meta?._vsgfb_meta_desc) ||
+    getStringMeta(post?.meta?.samenvatting) ||
+    post?.excerpt?.rendered ||
+    "";
   const description = post
     ? decodeHtml(stripHtml(String(rawSummary))) || "Lees het volledige wedstrijdverslag van Levy Opbergen."
     : "Lees het wedstrijdverslag van Levy Opbergen.";
