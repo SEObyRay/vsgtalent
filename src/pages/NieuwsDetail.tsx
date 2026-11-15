@@ -197,14 +197,14 @@ const NieuwsDetail = () => {
                 </div>
               )}
 
-              <MediaGallery
+              {!post.content.rendered.includes('vsg-photo-grid') && <MediaGallery
                 images={galleryImages}
                 videos={post.meta?.media_videos ?? []}
                 title="Race media"
                 videoPoster={featuredImage}
-              />
+              />}
 
-              <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content.rendered }} />
+              <div className="article-content prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content.rendered }} />
             </article>
           )}
         </div>

@@ -142,3 +142,76 @@ All colors MUST be HSL.
     @apply transition-smooth hover:shadow-orange;
   }
 }
+
+
+/* WordPress article content: readable results, links and original photos. */
+@layer components {
+  .article-content {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+  .article-content p { margin: 0 0 1.25em; }
+  .article-content .lead { font-size: 1.15em; line-height: 1.75; }
+  .article-content a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .article-content a:hover { text-decoration-thickness: 2px; }
+  .article-content ul, .article-content ol { margin: 1.25em 0; padding-left: 1.5em; }
+  .article-content ul { list-style: disc; }
+  .article-content ol { list-style: decimal; }
+  .article-content li + li { margin-top: 0.45em; }
+  .article-content .vsg-table-wrap, .article-content .wp-block-table {
+    width: 100%;
+    margin: 1.75rem 0 2.25rem;
+    overflow-x: auto;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+  }
+  .article-content table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
+  .article-content th, .article-content td {
+    padding: 0.875rem 1.125rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .article-content th { background: hsl(var(--primary) / 0.12); font-weight: 650; }
+  .article-content th + th, .article-content td + td { border-left: 1px solid hsl(var(--border)); }
+  .article-content tbody tr:last-child td { border-bottom: 0; }
+  .article-content tbody tr:nth-child(even) { background: hsl(var(--muted) / 0.5); }
+  .article-content td:last-child { white-space: nowrap; }
+  .article-content figure { margin: 1.75rem 0; max-width: 100%; }
+  .article-content figure img { display: block; width: 100%; height: auto; border-radius: 0.625rem; }
+  .article-content figcaption {
+    margin-top: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.825em;
+    line-height: 1.65;
+  }
+  .article-content .vsg-photo-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+    margin: 1.75rem 0;
+  }
+  .article-content .vsg-photo-grid figure {
+    margin: 0;
+    padding: 0.875rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    background: hsl(var(--card));
+  }
+  .article-content iframe { display: block; max-width: 100%; border-radius: 0.75rem; }
+  .article-content section:has(> iframe), .article-content section:has(> div > iframe) { margin: 1.75rem 0; }
+  @media (min-width: 640px) {
+    .article-content .vsg-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 639px) {
+    .article-content { font-size: 1rem; }
+    .article-content th, .article-content td { padding: 0.75rem; }
+  }
+}
