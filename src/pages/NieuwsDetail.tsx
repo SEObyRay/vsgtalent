@@ -91,7 +91,7 @@ const NieuwsDetail = () => {
 
   const canonicalPath = year && slug ? `/nieuws/${year}/${slug}` : "/nieuws";
   const title = post
-    ? `${decodeHtml(post.title.rendered)} | Wedstrijdverslag Levy Opbergen`
+    ? getStringMeta(post.meta?._vsgfb_seo_title) || `${decodeHtml(post.title.rendered)} | Wedstrijdverslag Levy Opbergen`
     : "Wedstrijdverslag | Levy Opbergen";
   const rawSummary =
     getStringMeta(post?.meta?._vsgfb_meta_desc) ||
@@ -111,6 +111,8 @@ const NieuwsDetail = () => {
         datePublished: post.date,
         dateModified: post.modified,
         image: featuredImage ? [featuredImage] : [`${SITE_URL}/og-image.jpg`],
+        about: { "@type": "Person", "@id": `${SITE_URL}/#levy-opbergen`, name: "Levy Opbergen", url: `${SITE_URL}/over-levy` },
+        contentLocation: { "@type": "Place", name: circuit },
         author: {
           "@type": "Person",
           name: "Levy Opbergen",

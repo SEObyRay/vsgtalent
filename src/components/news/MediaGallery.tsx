@@ -209,7 +209,7 @@ export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGaller
                     src={item.source}
                     alt={`${heading} ${index + 1}`}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-contain"
                     onError={() => handleMediaError(item.source)}
                   />
                 ) : (

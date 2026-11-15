@@ -8,227 +8,128 @@ import PageSeo from "@/components/seo/PageSeo";
 import { SITE_URL } from "@/lib/seo";
 
 const highlightItems = [
-  {
-    icon: Trophy,
-    title: "Kampioenschappen 2025",
-    description:
-      "Officieel Nederlands Kampioenschap Parolin Rocky 200cc bij Chrono en het Dutch Open Kampioenschap van NXT GP.",
-  },
-  {
-    icon: Compass,
-    title: "Internationale banen",
-    description:
-      "Assen, Spa-Francorchamps en Kerpen: Levy leert racen op circuits waar ook de grootste kampioenen reden.",
-  },
-  {
-    icon: Target,
-    title: "Missie",
-    description:
-      "Stap voor stap groeien naar de absolute top van het Europese karting met een professioneel team.",
-  },
+  { icon: Trophy, title: "Kampioenschappen 2026", description: "Levy rijdt in het Chrono NK 4T en het NXT GP Dutch Open in de Parolin Rocky 200cc-klasse." },
+  { icon: Compass, title: "Een volgende stap", description: "Naast de Parolin Rocky bouwt Levy ervaring op in de Rotax Mini Max met startnummer 104." },
+  { icon: Target, title: "Plezier en ontwikkeling", description: "Blijven leren, nieuwe dingen proberen en samen race-avonturen beleven staan centraal in zijn ontwikkeling." },
 ];
-
 const timeline = [
-  {
-    year: "2025",
-    title: "Start kartcarrière",
-    description:
-      "Levy (8) zet de eerste officiële stappen in de Parolin Rocky 200cc-klasse. Focus op racecraft, techniek en plezier.",
-  },
-  {
-    year: "2025",
-    title: "Chrono NK Parolin Rocky",
-    description:
-      "Volledig seizoen in het officiële Nederlands kampioenschap. Iedere race is een les in snelheid en tactiek.",
-  },
-  {
-    year: "2025",
-    title: "Dutch Open bij NXT GP",
-    description:
-      "Extra internationale ervaring tegen sterke concurrentie om sneller te groeien dan leeftijdsgenoten.",
-  },
+  { year: "2025", title: "Start kartcarrière", description: "Levy begint aan zijn kartavontuur en rijdt in Assen zijn eerste kartrace." },
+  { year: "2026", title: "Chrono NK 4T en NXT GP", description: "Wedstrijden in de Parolin Rocky 200cc brengen ervaring op circuits in Nederland, België en Duitsland." },
+  { year: "2026", title: "P4 bij de NXT GP-afsluiting in Assen", description: "Levy sluit het laatste NXT GP-weekend af met de vierde plaats en een beker." },
+  { year: "2026", title: "Ervaring opbouwen in Rotax Mini Max", description: "Testdagen en wedstrijden met startnummer 104 vormen een volgende stap. Bij Kart4Fun in Berghem meldt zijn team P6 in de Fun-klasse." },
 ];
-
 const circuits = [
-  {
-    name: "TT Junior Track Assen",
-    country: "Nederland",
-    description: "Racen naast het MotoGP-circuit — perfecte plek voor de eerste successen.",
-  },
-  {
-    name: "Karting des Fagnes Spa-Francorchamps",
-    country: "België",
-    description: "De uitdagende Ardennen lay-out dwingt Levy om elke bocht met precisie en lef aan te vallen.",
-  },
-  {
-    name: "Kartbahn Kerpen",
-    country: "Duitsland",
-    description: "Thuisbaan van de familie Schumacher en Sebastian Vettel. Inspiratiebron voor Levy’s ambities.",
-  },
+  { name: "TT Junior Track Assen", country: "Nederland", description: "De plek waar Levy zijn eerste kartrace reed en in 2026 zijn NXT GP-seizoen afsloot." },
+  { name: "Kartbaan Spa-Francorchamps", country: "België", description: "Tijdens het NK4T-weekend in Spa deed Levy ervaring op met races op een droge en natte baan." },
+  { name: "Erftlandring Kerpen", country: "Duitsland", description: "Trainingen en wedstrijden op deze kartbaan vragen om omgaan met veranderende omstandigheden." },
 ];
-
 const OverLevy = () => {
   const aboutJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    name: "Over Levy Opbergen",
-    url: `${SITE_URL}/over-levy`,
-    mainEntity: {
-      "@type": "Person",
-      name: "Levy Opbergen",
-      birthDate: "2017",
-      jobTitle: "Kartcoureur",
-      description:
-        "Levy Opbergen is een karttalent van acht jaar dat actief is in Europese competities en werkt aan een professionele racecarrière.",
+    "@context": "https://schema.org", "@type": "AboutPage",
+    name: "Levy Opbergen: groeien in de kartsport", url: `${SITE_URL}/over-levy`,
+    mainEntity: { "@type": "Person", "@id": `${SITE_URL}/#levy-opbergen`, name: "Levy Opbergen",
+      url: `${SITE_URL}/over-levy`, jobTitle: "Kartcoureur",
+      description: "Levy Opbergen begon in 2025 met karten en ontwikkelt zich in de Parolin Rocky 200cc en Rotax Mini Max.",
       image: `${SITE_URL}/og-image.jpg`,
-      memberOf: {
-        "@type": "SportsTeam",
-        name: "Team Levy Opbergen",
-      },
-    },
+      knowsAbout: ["Karting", "Parolin Rocky 200cc", "Rotax Mini Max", "Chrono NK 4T", "NXT GP Dutch Open"] },
   };
-
   return (
     <div className="min-h-screen bg-background">
-      <PageSeo
-        title="Over Levy Opbergen | Kart Racing Talent"
-        description="Lees het verhaal, de missie en de trainingsaanpak van karttalent Levy Opbergen en ontdek zijn route naar de top."
-        path="/over-levy"
-        jsonLd={aboutJsonLd}
-      />
+      <PageSeo title="Levy Opbergen | Karttalent in Parolin Rocky en Rotax Mini Max"
+        description="Maak kennis met Levy Opbergen: zijn kartcarrière, plezier in het racen en ontwikkeling van Parolin Rocky 200cc naar Rotax Mini Max."
+        path="/over-levy" jsonLd={aboutJsonLd} />
       <Header />
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 max-w-5xl space-y-20">
           <section className="text-center space-y-6">
-            <Badge variant="secondary" className="px-4 py-2 text-sm uppercase tracking-[0.2em]">
-              Over Levy Opbergen
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-headline font-bold leading-tight">
-              Gedreven talent van 8 jaar met grote dromen in het Europese karting
-            </h1>
+            <Badge variant="secondary" className="px-4 py-2 text-sm uppercase tracking-[0.2em]">Over Levy Opbergen</Badge>
+            <h1 className="text-4xl md:text-6xl font-headline font-bold leading-tight">Levy Opbergen: groeien in de kartsport</h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Levy Opbergen begon in 2025 aan zijn kartavontuur. Met een Parolin-chassis en een ID Engine 200cc Rocky motor
-              werkt hij elke training aan snelheid, controle en race-intelligentie. Doel: kampioen worden in de hoogste klasses
-              van het karting en uiteindelijk doorstromen naar de autosport.
+              Levy Opbergen begon in 2025 aan zijn kartavontuur. In 2026 rijdt hij wedstrijden in de Parolin Rocky 200cc en bouwt
+              hij daarnaast ervaring op in de Rotax Mini Max. Hij combineert wedstrijden met trainingen op circuits in Nederland, België en Duitsland.
             </p>
-            <div className="flex justify-center gap-4">
-              <Button asChild className="gradient-orange shadow-orange hover-lift">
-                <a href="/sponsors">Word partner</a>
-              </Button>
-              <Button variant="outline" asChild>
-                <a href="mailto:info@levyopbergen.nl">Plan een gesprek</a>
-              </Button>
+            <div className="flex justify-center flex-wrap gap-4">
+              <Button asChild className="gradient-orange shadow-orange hover-lift"><a href="/nieuws">Zijn wedstrijdverslagen</a></Button>
+              <Button variant="outline" asChild><a href="/agenda">Bekijk de raceagenda</a></Button>
             </div>
           </section>
-
           <section className="grid gap-6 md:grid-cols-3">
             {highlightItems.map((item) => (
-              <Card key={item.title} className="h-full border-border/60">
-                <CardContent className="p-8 space-y-4">
-                  <item.icon className="w-10 h-10 text-primary" />
-                  <h2 className="text-xl font-headline font-semibold">{item.title}</h2>
-                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
-                </CardContent>
-              </Card>
+              <Card key={item.title} className="h-full border-border/60"><CardContent className="p-8 space-y-4">
+                <item.icon className="w-10 h-10 text-primary" /><h2 className="text-xl font-headline font-semibold">{item.title}</h2>
+                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+              </CardContent></Card>
             ))}
           </section>
-
-          <section className="space-y-8">
-            <header className="space-y-2 text-center">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">Ontwikkeling en trainingsaanpak</h2>
-              <p className="text-muted-foreground max-w-3xl mx-auto">
-                Groei komt voort uit regelmatige trainingsblokken, fysieke begeleiding en mentale voorbereiding. Levy combineert
-                technische coaching met veel track time om iedere ronde sneller te worden.
+          <section className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">Waarom Levy racet</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Achter de resultaten staat vooral zijn plezier in het rijden. Levy wil ontdekken wat hij kan leren, beter begrijpen
+              hoe zijn kart reageert en zichzelf stap voor stap ontwikkelen. Winnen vindt hij leuk, maar nieuwe dingen proberen
+              en samen race-avonturen beleven horen daar net zo goed bij.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              In zijn persoonlijke terugblik van oktober vertelt hij hoe graag hij zijn helm opzet en de baan op gaat.
+              Het zoeken naar de juiste bocht, iets nieuws proberen en merken dat het lukt, maken het racen bijzonder voor hem.
+            </p>
+          </section>
+          <section className="grid gap-8 md:grid-cols-2 items-center">
+            <figure className="space-y-3">
+              <img src="/levy-opbergen-racehelm-tijger-2026.jpg" alt="Racehelm van Levy Opbergen met een witte tijger, groene ogen en zijn naam"
+                className="w-full h-auto rounded-2xl border border-border" loading="lazy" width="1080" height="1440" />
+              <figcaption className="text-sm text-muted-foreground">Levy’s racehelm met het persoonlijke tijgermotief. Foto uit de Facebook-update van 7 september 2026.</figcaption>
+            </figure>
+            <div className="space-y-5">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Een helm met een eigen verhaal</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                De nieuwe racehelm van Levy heeft voor zijn familie een persoonlijke betekenis. Het tijgermotief verwijst naar
+                een verhaal van zijn vader Stephan en staat voor vechtlust, verbondenheid en doorgaan na tegenslag.
+                Zo neemt Levy ook iets van zijn familieverhaal mee de baan op.
               </p>
-            </header>
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card className="h-full">
-                <CardContent className="p-8 space-y-4">
-                  <div className="flex items-center gap-3 text-primary">
-                    <Calendar className="w-5 h-5" />
-                    <span className="text-sm font-semibold uppercase tracking-wide">Trainingsschema</span>
-                  </div>
-                  <h3 className="text-2xl font-headline font-semibold">Meermaals per week op de baan</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Techniek, starts, racepace en wedstrijdsimulaties vormen de kern van het schema. Elke sessie eindigt met
-                    data-analyse zodat Levy precies weet waar hij kan verbeteren.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="h-full">
-                <CardContent className="p-8 space-y-4">
-                  <div className="flex items-center gap-3 text-primary">
-                    <Target className="w-5 h-5" />
-                    <span className="text-sm font-semibold uppercase tracking-wide">Mentale focus</span>
-                  </div>
-                  <h3 className="text-2xl font-headline font-semibold">Racen met een plan</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Voor elke race wordt een strategie opgesteld: inhaalpunten, bandenmanagement en startprocedures. Levy ontwikkelt
-                    een winnaarsmentaliteit zonder het plezier in de sport te verliezen.
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </section>
-
-          <section className="space-y-6">
-            <header className="space-y-2 text-center">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">Belangrijke kartbanen</h2>
-              <p className="text-muted-foreground max-w-3xl mx-auto">
-                Iedere baan vraagt om een unieke aanpak. Door in diverse landen te racen, ontwikkelt Levy zich razendsnel.
-              </p>
+          <section className="space-y-8">
+            <header className="space-y-3">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Ontwikkeling op en naast de baan</h2>
+              <p className="text-muted-foreground max-w-3xl">Testdagen en wedstrijden helpen Levy om ervaring te verzamelen. Begeleiding op de baan en aandacht voor conditie, voeding en mentale voorbereiding ondersteunen die ontwikkeling.</p>
             </header>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card><CardContent className="p-8 space-y-4">
+                <Calendar className="w-6 h-6 text-primary" /><h3 className="text-2xl font-headline font-semibold">Twee karts, nieuwe ervaringen</h3>
+                <p className="text-muted-foreground leading-relaxed">Naast zijn Parolin Rocky rijdt Levy in de Rotax Mini Max met startnummer 104. In november wisselde hij testdagen in Genk en Berghem af met een NK-training op De Landsard.</p>
+              </CardContent></Card>
+              <Card><CardContent className="p-8 space-y-4">
+                <Target className="w-6 h-6 text-primary" /><h3 className="text-2xl font-headline font-semibold">Aandacht voor voorbereiding</h3>
+                <p className="text-muted-foreground leading-relaxed">Levy werkt met Françoise bij PerformWell aan conditie, kracht, voeding en mentale voorbereiding. Plezier in zijn sport blijft daarbij belangrijk.</p>
+                <a className="text-primary underline" href="/nieuws/2026/performwell-duurzaam-presteren-levy-opbergen">Meer over zijn begeleiding bij PerformWell</a>
+              </CardContent></Card>
+            </div>
+          </section>
+          <section className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">Belangrijke kartbanen</h2>
             <div className="grid gap-6 md:grid-cols-3">
               {circuits.map((circuit) => (
-                <Card key={circuit.name} className="h-full">
-                  <CardContent className="p-6 space-y-3">
-                    <div className="flex items-center gap-2 text-primary font-semibold">
-                      <MapPin className="w-5 h-5" />
-                      {circuit.country}
-                    </div>
-                    <h3 className="text-xl font-headline font-semibold">{circuit.name}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{circuit.description}</p>
-                  </CardContent>
-                </Card>
+                <Card key={circuit.name}><CardContent className="p-6 space-y-3">
+                  <div className="flex items-center gap-2 text-primary font-semibold"><MapPin className="w-5 h-5" />{circuit.country}</div>
+                  <h3 className="text-xl font-headline font-semibold">{circuit.name}</h3><p className="text-muted-foreground">{circuit.description}</p>
+                </CardContent></Card>
               ))}
             </div>
           </section>
-
           <section className="space-y-6">
-            <header className="space-y-2 text-center">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">Roadmap naar succes</h2>
-              <p className="text-muted-foreground max-w-3xl mx-auto">
-                We bouwen aan een meerjarige route waarin ontwikkeling, sponsoring en exposure samenkomen. Hieronder de belangrijkste
-                mijlpalen.
-              </p>
-            </header>
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">Stappen in zijn kartcarrière</h2>
             <div className="relative border-l border-border/60 pl-8 space-y-10">
               {timeline.map((item) => (
-                <div key={item.year} className="relative">
-                  <span className="absolute -left-4 top-1.5 w-2 h-2 rounded-full bg-primary" />
-                  <h3 className="text-xl font-headline font-semibold">
-                    {item.year} · {item.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                <div key={item.title} className="relative"><span className="absolute -left-4 top-1.5 w-2 h-2 rounded-full bg-primary" />
+                  <h3 className="text-xl font-headline font-semibold">{item.year} · {item.title}</h3><p className="text-muted-foreground">{item.description}</p>
                 </div>
               ))}
             </div>
           </section>
-
           <section className="text-center space-y-4">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold">Samen sneller vooruit</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
-              Levy’s groei vraagt om partners die geloven in ambitie, professionaliteit en jeugdige energie. Ontdek hoe jouw merk kan
-              meegroeien met een karttalent dat vastbesloten is om de top te bereiken.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button asChild className="gradient-orange shadow-orange hover-lift">
-                <a href="/sponsors">Word partner</a>
-              </Button>
-              <Button variant="outline" asChild>
-                <a href="mailto:info@levyopbergen.nl">Plan een gesprek</a>
-              </Button>
-            </div>
+            <h2 className="text-3xl md:text-4xl font-headline font-bold">Volg Levy’s ontwikkeling</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">Lees de verslagen van zijn wedstrijden en ontdek waar Levy de volgende stappen zet.</p>
+            <Button asChild className="gradient-orange shadow-orange hover-lift"><a href="/nieuws">Bekijk het kartnieuws</a></Button>
           </section>
         </div>
       </main>
@@ -236,5 +137,4 @@ const OverLevy = () => {
     </div>
   );
 };
-
 export default OverLevy;
