@@ -860,12 +860,19 @@ class VSGTalent_Setup {
 
         $dir = trailingslashit(dirname($file_path));
         $desired_basename = sprintf('%s-%s-%d.%s', $slug, $type, $index, $extension);
-        $unique_basename = wp_unique_filename($dir, $desired_basename);
+        // A file already owned by this attachment is not a naming collision.
+        // Keep both the requested SEO name and an existing unique numeric suffix stable.
+        $desired_stem = pathinfo($desired_basename, PATHINFO_FILENAME);
+        $already_named = (bool) preg_match(
+            '/^' . preg_quote($desired_stem, '/') . '(?:-\d+)?\.' . preg_quote($extension, '/') . '$/i',
+            basename($file_path)
+        );
+        $unique_basename = $already_named ? basename($file_path) : wp_unique_filename($dir, $desired_basename);
         $new_file_path = $dir . $unique_basename;
 
         $should_rename = $file_path !== $new_file_path;
 
-        if ('image' === $type) {
+        if ('image' === $type && $should_rename) {
             $this->delete_existing_image_sizes($attachment_id, $file_path);
         }
 
@@ -887,23 +894,29 @@ class VSGTalent_Setup {
         $media_caption = $this->build_media_label($post_title, $type, $index, 'caption', $post_date);
         $media_description = $this->build_media_label($post_title, $type, $index, 'description', $post_date);
 
+        $attachment = get_post($attachment_id);
         wp_update_post(array(
             'ID'           => $attachment_id,
-            'post_title'   => $media_title,
-            'post_name'    => sanitize_title($media_title),
-            'post_excerpt' => $media_caption,
-            'post_content' => $media_description,
+            'post_title'   => $attachment->post_title ?: $media_title,
+            'post_name'    => $attachment->post_name ?: sanitize_title($media_title),
+            'post_excerpt' => $attachment->post_excerpt ?: $media_caption,
+            'post_content' => $attachment->post_content ?: $media_description,
             'guid'         => esc_url_raw($new_url),
         ));
 
         if ('image' === $type) {
-            $alt_text = $this->build_media_label($post_title, $type, $index, 'alt', $post_date);
-            update_post_meta($attachment_id, '_wp_attachment_image_alt', $alt_text);
+            if (!get_post_meta($attachment_id, '_wp_attachment_image_alt', true)) {
+                $alt_text = $this->build_media_label($post_title, $type, $index, 'alt', $post_date);
+                update_post_meta($attachment_id, '_wp_attachment_image_alt', $alt_text);
+            }
 
-            require_once ABSPATH . 'wp-admin/includes/image.php';
-            $metadata = wp_generate_attachment_metadata($attachment_id, $new_file_path);
-            if (!is_wp_error($metadata) && !empty($metadata)) {
-                wp_update_attachment_metadata($attachment_id, $metadata);
+            $existing_metadata = wp_get_attachment_metadata($attachment_id);
+            if ($should_rename || empty($existing_metadata)) {
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                $metadata = wp_generate_attachment_metadata($attachment_id, $new_file_path);
+                if (!is_wp_error($metadata) && !empty($metadata)) {
+                    wp_update_attachment_metadata($attachment_id, $metadata);
+                }
             }
         }
 
@@ -926,6 +939,18 @@ class VSGTalent_Setup {
                 if ($replaced !== $gallery) {
                     update_post_meta($post_id, 'media_gallery', $replaced);
                 }
+            }
+        }
+
+        // Rename links in the stored article as well as its gallery metadata.
+        // Updating the row directly avoids recursively running save_post again.
+        if ($post_id && $old_url && $old_url !== $new_url) {
+            $content = get_post_field('post_content', $post_id);
+            $updated_content = str_replace($old_url, $new_url, $content);
+            if ($updated_content !== $content) {
+                global $wpdb;
+                $wpdb->update($wpdb->posts, array('post_content' => $updated_content), array('ID' => $post_id), array('%s'), array('%d'));
+                clean_post_cache($post_id);
             }
         }
 
