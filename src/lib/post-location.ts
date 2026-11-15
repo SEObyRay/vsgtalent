@@ -4,6 +4,7 @@ import type { WPPost } from "@/types/wordpress";
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ");
 
 const LOCATION_ALIASES: Array<{ pattern: RegExp; label: string }> = [
+  { pattern: /\bkerpen\b/i, label: "Erftlandring Kerpen" },
   { pattern: /\bde[-\s]?landsard\b/i, label: "De Landsard" },
   { pattern: /\bstrijen\b/i, label: "Strijen" },
   { pattern: /\bemmen\b/i, label: "Emmen" },
@@ -57,6 +58,8 @@ export const getPostCircuitLabel = (post: WPPost | null | undefined) => {
 
   const explicitCircuit = typeof post.meta?.circuit === "string" ? decodeHtml(post.meta.circuit).trim() : "";
   if (explicitCircuit) return explicitCircuit;
+
+  if (/debuutseizoen-nk4t-karting-2026|performwell|kartjaar|jaar karten|kartdesign|trainingsmaand|bouwt[- ]verder|volgende[- ]stap|chrono-nk4t-nxt-gp-2026/i.test(post.slug ?? "")) return "Onbekend circuit";
 
   return (
     extractLocationFromText(post.title?.rendered) ||

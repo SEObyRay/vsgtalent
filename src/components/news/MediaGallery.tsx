@@ -62,6 +62,7 @@ type MediaGalleryProps = {
   videos?: (string | null | undefined)[] | null;
   title?: string;
   videoPoster?: string | null;
+  imageAlt?: string;
 };
 
 type GalleryItem = {
@@ -130,10 +131,10 @@ const buildGalleryItems = (images?: MediaGalleryProps["images"], videos?: MediaG
     .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
     .map((source) => ({ type: "video", source: normalizeMediaSource(source) } as const));
 
-  return [...imageItems, ...videoItems];
+  return Array.from(new Map([...imageItems, ...videoItems].map((item) => [item.source, item])).values());
 };
 
-export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGalleryProps) => {
+export const MediaGallery = ({ images, videos, title, videoPoster, imageAlt }: MediaGalleryProps) => {
   const items = buildGalleryItems(images, videos);
   const normalizedVideoPoster = videoPoster ? normalizeMediaSource(videoPoster) : null;
   const [api, setApi] = useState<CarouselApi>();
@@ -207,7 +208,7 @@ export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGaller
                 {item.type === "image" ? (
                   <img
                     src={item.source}
-                    alt={`${heading} ${index + 1}`}
+                    alt={(imageAlt ?? heading) + " – foto " + (index + 1)}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-contain"
                     onError={() => handleMediaError(item.source)}
@@ -247,6 +248,8 @@ export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGaller
             <button
               key={`thumb-${item.source}`}
               onClick={() => api?.scrollTo(index)}
+              aria-label={"Bekijk " + (item.type === "image" ? "foto" : "video") + " " + (index + 1)}
+              aria-pressed={current === index}
               className={cn(
                 "relative aspect-video overflow-hidden rounded-lg border-2 transition-all hover:scale-105",
                 current === index
@@ -257,7 +260,7 @@ export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGaller
               {item.type === "image" ? (
                 <img
                   src={item.source}
-                  alt={`Thumbnail ${index + 1}`}
+                  alt=""
                   className="h-full w-full object-cover"
                   onError={() => handleMediaError(item.source)}
                 />
@@ -266,7 +269,7 @@ export const MediaGallery = ({ images, videos, title, videoPoster }: MediaGaller
                   {normalizedVideoPoster && (
                     <img
                       src={normalizedVideoPoster}
-                      alt={`Video thumbnail ${index + 1}`}
+                      alt=""
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                   )}

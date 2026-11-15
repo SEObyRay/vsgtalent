@@ -40,5 +40,27 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/nieuws/2025/glorieuze-overwinning-iame-x30-challenge",
+      "destination": "/nieuws/2025/levy-opbergen-p5-rookiepodium-strijen-2025",
+      "permanent": true
+    },
+    {
+      "source": "/nieuws/2026/levy-opbergen-schittert-podiumplaats-strijen",
+      "destination": "/nieuws/2025/levy-opbergen-p5-rookiepodium-strijen-2025",
+      "permanent": true
+    },
+    {
+      "source": "/nieuws/2026/levy-opbergen-vernieuwd-circuit-emmen",
+      "destination": "/nieuws/2026/levy-opbergen-nk4t-debuut-landsard-2026",
+      "permanent": true
+    },
+    {
+      "source": "/nieuws/2026/levy-opbergen-zet-volgende-stap-in-2025-chrono-nk-4t-en-nxt-gp-dutch-open",
+      "destination": "/nieuws/2026/levy-opbergen-chrono-nk4t-nxt-gp-2026",
+      "permanent": true
+    }
   ]
 }

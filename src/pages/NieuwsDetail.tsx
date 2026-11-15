@@ -68,9 +68,11 @@ const formatDate = (date?: string) => {
 };
 
 const extractTerms = (post: WPPost | null) => {
-  // Terms are not embedded in the REST response, so we return empty strings
-  // In a real app, we'd fetch these separately if needed
-  return { competition: "", season: "" };
+  const terms = (post?._embedded?.["wp:term"] as Array<Array<{ name: string; taxonomy: string }>> | undefined)?.flat() ?? [];
+  return {
+    competition: terms.find((term) => term.taxonomy === "competitie")?.name ?? "",
+    season: terms.find((term) => term.taxonomy === "seizoen")?.name ?? post?.date?.slice(0, 4) ?? "",
+  };
 };
 
 const NieuwsDetail = () => {
@@ -89,7 +91,7 @@ const NieuwsDetail = () => {
   const circuit = getPostCircuitLabel(post);
   const position = post?.meta?.positie ? Number(post.meta.positie) : null;
 
-  const canonicalPath = year && slug ? `/nieuws/${year}/${slug}` : "/nieuws";
+  const canonicalPath = post ? "/nieuws/" + post.date.slice(0, 4) + "/" + post.slug : year && slug ? "/nieuws/" + year + "/" + slug : "/nieuws";
   const title = post
     ? getStringMeta(post.meta?._vsgfb_seo_title) || `${decodeHtml(post.title.rendered)} | Wedstrijdverslag Levy Opbergen`
     : "Wedstrijdverslag | Levy Opbergen";
@@ -112,14 +114,15 @@ const NieuwsDetail = () => {
         dateModified: post.modified,
         image: featuredImage ? [featuredImage] : [`${SITE_URL}/og-image.jpg`],
         about: { "@type": "Person", "@id": `${SITE_URL}/#levy-opbergen`, name: "Levy Opbergen", url: `${SITE_URL}/over-levy` },
-        contentLocation: { "@type": "Place", name: circuit },
+        ...(circuit !== "Onbekend circuit" ? { contentLocation: { "@type": "Place", name: circuit } } : {}),
         author: {
-          "@type": "Person",
-          name: "Levy Opbergen",
+          "@type": "Organization",
+          name: "VSG Talent",
+          url: SITE_URL,
         },
         publisher: {
           "@type": "Organization",
-          name: "Team Levy Opbergen",
+          name: "VSG Talent",
           logo: {
             "@type": "ImageObject",
             url: `${SITE_URL}/og-image.jpg`,
@@ -140,7 +143,15 @@ const NieuwsDetail = () => {
         path={canonicalPath}
         type="article"
         image={featuredImage ?? undefined}
-        jsonLd={articleJsonLd}
+        jsonLd={articleJsonLd ? [articleJsonLd, {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Nieuws", item: SITE_URL + "/nieuws" },
+            { "@type": "ListItem", position: 3, name: decodeHtml(post!.title.rendered), item: buildCanonical(canonicalPath) },
+          ],
+        }] : undefined}
       />
       <Header />
       <main className="pt-28 pb-20">
@@ -173,10 +184,10 @@ const NieuwsDetail = () => {
                     <Calendar className="w-4 h-4" />
                     {formatDate(post.date)}
                   </div>
-                  <div className="flex items-center gap-2">
+                  {circuit !== "Onbekend circuit" && <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
                     {circuit}
-                  </div>
+                  </div>}
                   {competition && <span>{competition}</span>}
                 </div>
 
@@ -197,12 +208,14 @@ const NieuwsDetail = () => {
                 </div>
               )}
 
-              {!post.content.rendered.includes('vsg-photo-grid') && <MediaGallery
+              <MediaGallery
+                key={post.id}
                 images={galleryImages}
                 videos={post.meta?.media_videos ?? []}
-                title="Race media"
+                title="Foto’s en video’s"
+                imageAlt={decodeHtml(post.title.rendered)}
                 videoPoster={featuredImage}
-              />}
+              />
 
               <div className="article-content prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content.rendered }} />
             </article>
