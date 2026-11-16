@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ZoomIn } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Carousel,
@@ -140,6 +142,14 @@ export const MediaGallery = ({ images, videos, title, videoPoster, imageAlt }: M
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [failedSources, setFailedSources] = useState<Set<string>>(() => new Set());
+  const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
+  const [expandedImage, setExpandedImage] = useState<GalleryItem | null>(null);
+  const rememberImageSize = (source: string, image: HTMLImageElement) => {
+    const ratio = image.naturalWidth / image.naturalHeight;
+    if (Number.isFinite(ratio) && ratio > 0) {
+      setImageRatios((previous) => previous[source] === ratio ? previous : { ...previous, [source]: ratio });
+    }
+  };
   const videoRefs = useRef(new Map<string, HTMLVideoElement>());
 
   const handleMediaError = (src: string) => {
@@ -189,6 +199,40 @@ export const MediaGallery = ({ images, videos, title, videoPoster, imageAlt }: M
   }
 
   const heading = title ?? "Media";
+  const portraitGrid = visibleItems.every((item) => item.type === "image" && imageRatios[item.source] < 1);
+
+  if (portraitGrid) {
+    return (
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-headline font-semibold">{heading}</h2>
+          <span className="text-sm text-muted-foreground">{visibleItems.length} {visibleItems.length === 1 ? "foto" : "foto’s"}</span>
+        </div>
+        <div className={cn("grid gap-3 sm:gap-4", visibleItems.length === 1 ? "max-w-sm mx-auto" : visibleItems.length === 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")}>
+          {visibleItems.map((item, index) => (
+            <button
+              key={item.source}
+              type="button"
+              onClick={() => setExpandedImage(item)}
+              aria-label={`Vergroot foto ${index + 1}`}
+              className="group relative block w-full overflow-hidden rounded-2xl border border-border bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+              style={{ aspectRatio: imageRatios[item.source] }}
+            >
+              <img src={item.source} alt={`${imageAlt ?? heading} – foto ${index + 1}`} loading="lazy" className="h-full w-full object-contain" onError={() => handleMediaError(item.source)} />
+              <span className="absolute bottom-3 right-3 rounded-full bg-background/80 p-2 text-foreground backdrop-blur transition-colors group-hover:bg-primary"><ZoomIn className="h-4 w-4" aria-hidden="true" /></span>
+            </button>
+          ))}
+        </div>
+        <Dialog open={expandedImage !== null} onOpenChange={(open) => { if (!open) setExpandedImage(null); }}>
+          <DialogContent className="w-[calc(100%-2rem)] max-w-4xl border-border p-2 pt-10 sm:rounded-2xl">
+            <DialogTitle className="sr-only">{imageAlt ?? heading}</DialogTitle>
+            <DialogDescription className="sr-only">Volledige foto. Sluit met Escape of de sluitknop.</DialogDescription>
+            {expandedImage && <img src={expandedImage.source} alt={imageAlt ?? heading} className="mx-auto max-h-[80dvh] w-auto max-w-full object-contain" />}
+          </DialogContent>
+        </Dialog>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-4">
@@ -211,6 +255,7 @@ export const MediaGallery = ({ images, videos, title, videoPoster, imageAlt }: M
                     alt={(imageAlt ?? heading) + " – foto " + (index + 1)}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-contain"
+                    onLoad={(event) => rememberImageSize(item.source, event.currentTarget)}
                     onError={() => handleMediaError(item.source)}
                   />
                 ) : (
@@ -262,6 +307,7 @@ export const MediaGallery = ({ images, videos, title, videoPoster, imageAlt }: M
                   src={item.source}
                   alt=""
                   className="h-full w-full object-cover"
+                  onLoad={(event) => rememberImageSize(item.source, event.currentTarget)}
                   onError={() => handleMediaError(item.source)}
                 />
               ) : (
